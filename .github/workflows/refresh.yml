@@ -36,7 +36,7 @@ jobs:
           INTERCOM_TOKEN: ${{ secrets.INTERCOM_TOKEN }}
           INTERCOM_REGION: us
           HIDE_CUSTOMERS: "false"
-        run: node scripts/fetch-data.mjs
+        run: node ./fetch-data.mjs
 
       - uses: actions/configure-pages@v5
 
