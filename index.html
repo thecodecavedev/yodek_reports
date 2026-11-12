@@ -408,8 +408,22 @@ function tick() {
   if (Date.now() - lastPoll > (busy ? POLL_BUSY_MS : REFRESH_MS)) load();
 }
 
+// Yodeck keeps this page open indefinitely, so check whether index.html itself has
+// been updated and reload when it has. Without this, new versions never reach the TV.
+let pageVersion = null;
+async function checkForNewVersion() {
+  try {
+    const res = await fetch(`index.html?v=${Date.now()}`, {method: "HEAD", cache: "no-store"});
+    const v = res.headers.get("etag") || res.headers.get("last-modified");
+    if (!v) return;
+    if (pageVersion === null) pageVersion = v;
+    else if (v !== pageVersion) location.reload();
+  } catch (e) { /* offline: try again next time */ }
+}
+
 async function load() {
   lastPoll = Date.now();
+  checkForNewVersion();
   try {
     const res = await fetch(`data.json?t=${Date.now()}`, {cache: "no-store"});   // skip the CDN cache
     if (!res.ok) throw new Error(res.status);
