@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luvelo Support Summary</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#FF3131;--ink:#14181F;--ink2:#4A5560;--muted:#78838F;--rule:#E2E7ED;
+  --panel:#F6F8FA;--good:#1E7A4C;--bad:#D03B3B;--amber:#F7D971;--amber-wash:#FFFBEF;
+  --new:#2a78d6;--res:#14181F}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+body{font-family:Poppins,"Segoe UI",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#stage{width:1920px;height:1080px;transform-origin:0 0;position:absolute;top:0;left:0;display:flex;flex-direction:column}
+.band{height:84px;background:var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 48px;flex:none}
+.band img{height:38px}
+.band .title{color:#fff;font-weight:700;font-size:18px;letter-spacing:3px;text-transform:uppercase}
+.band .when{color:#fff;font-size:16px;opacity:.92;text-align:right}
+.stale{display:none;background:var(--amber-wash);border-bottom:2px solid var(--amber);color:#7a5a00;
+  font-weight:600;font-size:18px;padding:8px 48px}
+main{flex:1;padding:18px 48px 12px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.eyebrow{color:var(--red);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin:0 0 -6px}
+.row{display:grid;gap:18px}
+.r4{grid-template-columns:repeat(4,1fr)}
+.r5{grid-template-columns:repeat(4,1fr) 1.35fr}
+.tile{border:1.5px solid var(--rule);border-radius:12px;padding:12px 22px 11px}
+.lab{color:var(--muted);font-weight:700;font-size:14px;letter-spacing:1.4px;text-transform:uppercase}
+.val{font-weight:800;font-size:52px;line-height:1.1;margin-top:2px;letter-spacing:-1px}
+.r5 .val{font-size:46px}
+.cap{color:var(--ink2);font-size:15px;margin-top:2px}
+.cap.good{color:var(--good);font-weight:600}.cap.bad{color:var(--bad);font-weight:600}
+.charts{flex:1;display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:14px;min-height:0}
+.card{border:1.5px solid var(--rule);border-radius:12px;padding:12px 22px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.card h3{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--red)}
+.card .note{color:var(--muted);font-size:14px;margin-top:auto;padding-top:8px}
+.key{display:flex;gap:22px;font-size:15px;color:var(--ink2)}
+.key i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.cols{flex:1;display:flex;gap:16px;align-items:stretch;min-height:0;padding-top:4px}
+.col{flex:1;display:flex;flex-direction:column}
+.pair{flex:1;display:flex;gap:6px;align-items:flex-end}
+.bw{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.bar{width:100%;border-radius:5px 5px 0 0}
+.bn{background:var(--new)}.br{background:var(--res)}
+.bv{font-weight:700;font-size:17px;margin-bottom:3px}.bv.z{color:var(--muted);font-weight:500}
+.dl{text-align:center;font-size:14px;color:var(--muted);margin-top:6px;line-height:1.25}
+.dl b{display:block;color:var(--ink);font-size:16px}
+.prow{display:grid;grid-template-columns:18px 110px 1fr 70px;align-items:center;gap:12px;margin:9px 0}
+.dot{width:14px;height:14px;border-radius:50%}
+.pl{font-size:20px;font-weight:600}
+.track{height:20px;background:var(--panel);border-radius:5px;overflow:hidden}
+.fill{height:100%;border-radius:5px}
+.pn{font-size:24px;font-weight:800;text-align:right}
+.donutwrap{flex:1;display:flex;align-items:center;gap:36px;min-height:0}
+.donut{width:184px;height:184px;border-radius:50%;flex:none;display:grid;place-items:center}
+.hole{width:112px;height:112px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hole b{font-size:32px;font-weight:800;line-height:1}.hole span{color:var(--muted);font-size:15px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:9px 28px;flex:1}
+.li{display:flex;align-items:center;gap:9px;font-size:16px;white-space:nowrap}
+.sw{width:13px;height:13px;border-radius:3px;flex:none}
+.ln{color:var(--ink2);overflow:hidden;text-overflow:ellipsis}.li b{font-weight:700}.lp{color:var(--muted);font-size:14px}
+.crow{display:grid;grid-template-columns:230px 1fr 60px 80px;align-items:center;gap:14px;margin:4px 0;font-size:16px}
+.crow.head{color:var(--muted);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin:0}
+.crow.head span:nth-child(n+3),.crow b,.ca{text-align:right}
+.cn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctrack{height:14px;background:var(--panel);border-radius:4px;overflow:hidden}
+.cfill{height:100%;background:var(--ink);border-radius:4px}
+.ca{color:var(--muted)}
+footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
+
+.err{color:var(--bad);font-size:20px;padding:40px 48px}
+</style></head>
+<body><div id="stage">
+<div class="band"><img src="data:image/png;base64,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" alt="luvelo">
+  <div class="title">Support summary</div>
+  <div class="when" id="when">Loading…</div></div>
+<div class="stale" id="stale">Data may be out of date: the last successful refresh was over 30 minutes ago.</div>
+<main id="main">
+  <p class="eyebrow">The backlog and four weeks of flow</p>
+  <div class="row r4" id="row1"></div>
+  <p class="eyebrow">Today and yesterday</p>
+  <div class="row r5" id="row2"></div>
+  <div class="charts">
+    <div class="card"><h3>New vs resolved, past 7 days</h3>
+      <div class="key"><span><i style="background:var(--new)"></i>New</span><span><i style="background:var(--res)"></i>Resolved</span></div>
+      <div class="cols" id="byday"></div></div>
+    <div class="card"><h3>Open by priority</h3><div id="priority"></div><div class="note" id="prinote"></div></div>
+    <div class="card"><h3>Open by ticket type</h3><div class="donutwrap" id="types"></div></div>
+    <div class="card"><h3>Open by customer</h3><div id="customers"></div></div>
+  </div>
+</main>
+<footer>Live from Intercom · Open counts conversations in the open state · First response is Intercom's native measure and does not see replies made in Slack · Day boundaries in SAST</footer>
+</div>
+<script>
+const REFRESH_MS = 5 * 60 * 1000;   // re-read data.json this often
+const STALE_MIN = 30;               // GitHub's scheduler can run late, so allow some slack
+const TYPE_COLOURS = {"Product Bug":"#2a78d6","Feature Request":"#eb6834","User Troubleshooting":"#1baf7a",
+  "Configuration Assistance":"#eda100","Access Request":"#e87ba4","Internal Conversations":"#4a3aa7",
+  "Data Management":"#008300","Platform Incident":"#e34948"};
+const NEUTRAL = "#9AA4B2";
+const PRI = {Critical:"#D03B3B", High:"#EC835A", Medium:"#FAB219"};
+let lastEpoch = 0;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const num = (v) => v == null ? "n/a" : (typeof v === "number" ? v.toLocaleString("en-GB") : v);
+
+function duration(sec) {
+  if (sec == null) return "n/a";
+  sec = Math.round(sec);
+  const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+  if (h >= 24) return `${Math.floor(h / 24)}d ${h % 24}h`;
+  if (h) return `${h}h ${m}m`;
+  return `${m}m ${String(s).padStart(2, "0")}s`;
+}
+
+const tile = (label, value, cap = "", cls = "") =>
+  `<div class="tile"><div class="lab">${label}</div><div class="val">${num(value)}</div>` +
+  (cap ? `<div class="cap ${cls}">${cap}</div>` : "") + `</div>`;
+
+function render(d) {
+  const net = d.resolved_4w - d.opened_4w;
+  const netCap = net > 0 ? `${net} more resolved than opened` : net < 0 ? `${-net} more opened than resolved` : "level with opened";
+  $("row1").innerHTML =
+    tile("Open tickets", d.open_total, "Conversations in the open state") +
+    tile("Waiting on customer", d.waiting_on_customer, "Tickets in that state now") +
+    tile("Opened, past 4 weeks", d.opened_4w, "New conversations, last 28 days") +
+    tile("Resolved, past 4 weeks", d.resolved_4w, netCap, net > 0 ? "good" : net < 0 ? "bad" : "");
+  $("row2").innerHTML =
+    tile("New today", d.new_today) + tile("New yesterday", d.new_yesterday) +
+    tile("Resolved today", d.resolved_today) + tile("Resolved yesterday", d.resolved_yesterday) +
+    tile("Median first response", duration(d.frt.median_sec),
+         `Past week, Intercom replies only · ${d.frt.answered} of ${d.frt.total} answered`);
+
+  const top = Math.max(1, ...d.by_day.map((r) => Math.max(r.new, r.resolved)));
+  $("byday").innerHTML = d.by_day.map((r) => {
+    const bar = (n, cls) => `<div class="bw"><span class="bv${n ? "" : " z"}">${n}</span>` +
+      `<div class="bar ${cls}" style="height:${n ? Math.max(3, Math.round(n / top * 100)) : 1.5}%"></div></div>`;
+    return `<div class="col"><div class="pair">${bar(r.new, "bn")}${bar(r.resolved, "br")}</div>` +
+      `<div class="dl"><b>${r.day}</b>${r.date}</div></div>`;
+  }).join("");
+
+  const ptop = Math.max(1, ...d.priority.map((r) => r.count));
+  $("priority").innerHTML = d.priority.map((r) =>
+    `<div class="prow"><span class="dot" style="background:${PRI[r.label]}"></span><span class="pl">${r.label}</span>` +
+    `<div class="track"><div class="fill" style="width:${Math.max(0.8, r.count / ptop * 100)}%;background:${PRI[r.label]}"></div></div>` +
+    `<span class="pn">${num(r.count)}</span></div>`).join("");
+  const ch = d.priority.filter((r) => r.label !== "Medium").reduce((a, r) => a + r.count, 0);
+  $("prinote").textContent = `Critical and High together: ${ch} of ${num(d.open_total)} open`;
+
+  const total = d.types.reduce((a, r) => a + r.count, 0);
+  let start = 0;
+  const stops = [], legend = [];
+  for (const r of d.types) {
+    const c = TYPE_COLOURS[r.type] || NEUTRAL, share = total ? r.count / total * 100 : 0;
+    stops.push(`${c} ${start.toFixed(2)}% ${(start + share).toFixed(2)}%`);
+    start += share;
+    legend.push(`<div class="li"><span class="sw" style="background:${c}"></span><span class="ln">${esc(r.type)}</span>` +
+      `<b>${r.count}</b><span class="lp">${share > 0 && share < 1 ? "<1%" : share.toFixed(0) + "%"}</span></div>`);
+  }
+  $("types").innerHTML = `<div class="donut" style="background:conic-gradient(${stops.join(",") || NEUTRAL + " 0 100%"})">` +
+    `<div class="hole"><b>${num(total)}</b><span>open</span></div></div><div class="legend">${legend.join("")}</div>`;
+
+  let rows = d.customers.slice(0, 4);
+  const rest = d.customers.slice(4);
+  if (rest.length) {
+    const n = rest.reduce((a, r) => a + r.count, 0);
+    rows.push({customer: `${rest.length} others`, count: n, avg_days: rest.reduce((a, r) => a + r.avg_days * r.count, 0) / n});
+  }
+  const ctop = Math.max(1, ...rows.map((r) => r.count));
+  $("customers").innerHTML = `<div class="crow head"><span></span><span></span><span>Open</span><span>Avg age</span></div>` +
+    rows.map((r) => `<div class="crow"><span class="cn">${esc(r.customer)}</span><div class="ctrack"><div class="cfill" ` +
+      `style="width:${Math.max(0.8, r.count / ctop * 100)}%"></div></div><b>${r.count}</b><span class="ca">${Math.round(r.avg_days)}d</span></div>`).join("");
+
+  lastEpoch = d.snapshot_epoch;
+  const when = new Date(d.snapshot_epoch * 1000).toLocaleString("en-GB",
+    {weekday: "short", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg"});
+  $("when").textContent = `Updated ${when} SAST` + (d.sample ? " (sample data)" : "");
+  checkStale();
+}
+
+function checkStale() {
+  $("stale").style.display = lastEpoch && Date.now() / 1000 - lastEpoch > STALE_MIN * 60 ? "block" : "none";
+}
+
+async function load() {
+  try {
+    const res = await fetch(`data.json?t=${Date.now()}`, {cache: "no-store"});   // skip the CDN cache
+    if (!res.ok) throw new Error(res.status);
+    render(await res.json());
+  } catch (e) {
+    console.error("data.json load failed", e);   // keep the last good render on screen
+    checkStale();
+  }
+}
+
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080), st = $("stage");
+  st.style.transform = `scale(${s})`;
+  st.style.left = (innerWidth - 1920 * s) / 2 + "px";
+  st.style.top = (innerHeight - 1080 * s) / 2 + "px";
+}
+addEventListener("resize", fit);
+fit();
+load();
+setInterval(load, REFRESH_MS);
+setInterval(checkStale, 60 * 1000);
+</script>
+</body></html>

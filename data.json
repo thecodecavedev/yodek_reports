@@ -1,0 +1,146 @@
+{
+  "snapshot_epoch": 1794470778,
+  "open_total": 224,
+  "waiting_on_customer": 9,
+  "opened_4w": 202,
+  "resolved_4w": 232,
+  "new_today": 15,
+  "new_yesterday": 0,
+  "resolved_today": 14,
+  "resolved_yesterday": 0,
+  "frt": {
+    "median_sec": 2187,
+    "answered": 41,
+    "total": 58
+  },
+  "by_day": [
+    {
+      "day": "Tue",
+      "date": "29 Sep",
+      "new": 12,
+      "resolved": 13
+    },
+    {
+      "day": "Wed",
+      "date": "30 Sep",
+      "new": 9,
+      "resolved": 11
+    },
+    {
+      "day": "Thu",
+      "date": "1 Oct",
+      "new": 7,
+      "resolved": 6
+    },
+    {
+      "day": "Fri",
+      "date": "2 Oct",
+      "new": 10,
+      "resolved": 8
+    },
+    {
+      "day": "Sat",
+      "date": "3 Oct",
+      "new": 1,
+      "resolved": 2
+    },
+    {
+      "day": "Sun",
+      "date": "4 Oct",
+      "new": 0,
+      "resolved": 0
+    },
+    {
+      "day": "Mon",
+      "date": "5 Oct",
+      "new": 15,
+      "resolved": 14
+    }
+  ],
+  "priority": [
+    {
+      "label": "Critical",
+      "count": 2
+    },
+    {
+      "label": "High",
+      "count": 13
+    },
+    {
+      "label": "Medium",
+      "count": 209
+    }
+  ],
+  "types": [
+    {
+      "type": "Feature Request",
+      "count": 80
+    },
+    {
+      "type": "Product Bug",
+      "count": 68
+    },
+    {
+      "type": "User Troubleshooting",
+      "count": 25
+    },
+    {
+      "type": "Configuration Assistance",
+      "count": 18
+    },
+    {
+      "type": "Internal Conversations",
+      "count": 16
+    },
+    {
+      "type": "Data Management",
+      "count": 9
+    },
+    {
+      "type": "Access Request",
+      "count": 7
+    },
+    {
+      "type": "Platform Incident",
+      "count": 1
+    }
+  ],
+  "customers": [
+    {
+      "customer": "The Luke Commission",
+      "count": 192,
+      "avg_days": 84.7
+    },
+    {
+      "customer": "Eswatini Railways",
+      "count": 16,
+      "avg_days": 52.5
+    },
+    {
+      "customer": "Circle of Hope",
+      "count": 9,
+      "avg_days": 46.0
+    },
+    {
+      "customer": "CHCC",
+      "count": 3,
+      "avg_days": 0.3
+    },
+    {
+      "customer": "Project Canaan",
+      "count": 2,
+      "avg_days": 68.8
+    },
+    {
+      "customer": "JB Timbers",
+      "count": 1,
+      "avg_days": 83.3
+    },
+    {
+      "customer": "EBH",
+      "count": 1,
+      "avg_days": 81.3
+    }
+  ],
+  "sample": true
+}
