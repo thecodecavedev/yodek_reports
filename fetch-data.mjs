@@ -14,7 +14,7 @@ const HOSTS = { us: "https://api.intercom.io", eu: "https://api.eu.intercom.io",
 const BASE = HOSTS[process.env.INTERCOM_REGION || "us"];
 const TOKEN = process.env.INTERCOM_TOKEN;
 const HIDE_CUSTOMERS = process.env.HIDE_CUSTOMERS === "true";
-const OUT = new URL("../site/data.json", import.meta.url);
+const OUT = new URL("./data.json", import.meta.url);
 
 const ATTR_PRIORITY = "Priority Level";
 const ATTR_CUSTOMER = "Customer";
