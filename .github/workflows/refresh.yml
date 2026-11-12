@@ -3,7 +3,7 @@ name: Refresh support summary
 on:
   schedule:
     # Times are UTC. SAST is UTC+2, so 05:00-16:59 UTC is 07:00-18:59 SAST.
-    - cron: "*/15 5-16 * * 1-5"   # every 15 minutes, weekday support hours
+    - cron: "*/5 5-16 * * 1-5"   # every 15 minutes, weekday support hours
     - cron: "0 */3 * * *"         # every 3 hours otherwise, so weekends stay roughly current
   workflow_dispatch:              # "Run workflow" button for a manual refresh
   push:
