@@ -1,51 +1,62 @@
 name: Refresh support summary
 
 on:
-  schedule:
-    # Times are UTC. SAST is UTC+2, so 05:00-16:59 UTC is 07:00-18:59 SAST.
-    - cron: "*/30 5-16 * * 1-5"   # every 15 minutes, weekday support hours
-    # - cron: "0 */3 * * *"         # every 3 hours otherwise, so weekends stay roughly current
-  workflow_dispatch:              # "Run workflow" button for a manual refresh
+  workflow_dispatch:
   push:
-    branches: [main]              # redeploy when the page or script changes
+    branches: [main]
 
 permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:                      # never let two refreshes overlap
-  group: pages
-  cancel-in-progress: false
+  actions: write            # lets the run start the next one
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
-      - name: Pull figures from Intercom
+      - run: node ./fetch-data.mjs
         env:
           INTERCOM_TOKEN: ${{ secrets.INTERCOM_TOKEN }}
-          INTERCOM_REGION: us
-          HIDE_CUSTOMERS: "false"
-        run: node ./fetch-data.mjs
-
       - uses: actions/configure-pages@v5
-
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./
           name: github-pages-${{ github.run_attempt }}
-
       - id: deploy
         uses: actions/deploy-pages@v4
         with:
           artifact_name: github-pages-${{ github.run_attempt }}
+
+  # Waits, then starts the next refresh. Only one of these is ever alive:
+  # a newer one cancels any older one that is still waiting.
+  next:
+    needs: refresh
+    if: always()            # keep the chain going even if a refresh fails
+    runs-on: ubuntu-latest
+    concurrency:
+      group: chain
+      cancel-in-progress: true
+    steps:
+      - name: Wait, then queue the next refresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          HOUR=$(TZ=Africa/Johannesburg date +%-H)
+          DAY=$(TZ=Africa/Johannesburg date +%u)
+          if [ "$DAY" -le 5 ] && [ "$HOUR" -ge 7 ] && [ "$HOUR" -lt 19 ]; then
+            sleep 840     # weekday support hours: next run in about 15 minutes
+          else
+            sleep 10800   # nights and weekends: every 3 hours
+          fi
+          gh workflow run refresh.yml --ref main -R ${{ github.repository }}
