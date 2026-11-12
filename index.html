@@ -124,17 +124,6 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes fadein{from{opacity:.25}to{opacity:1}}
-/* ---------- next update countdown ---------- */
-.next{display:flex;align-items:center;gap:10px;color:#fff;font-size:15px}
-.next .ring{width:26px;height:26px;transform:rotate(-90deg);flex:none}
-.next .ring circle{fill:none;stroke-width:3.5}
-.next .ring .bg{stroke:rgba(255,255,255,.3)}
-.next .ring .fg{stroke:#fff;stroke-linecap:round;stroke-dasharray:62.83;transition:stroke-dashoffset 1s linear}
-.next .nl{opacity:.85;letter-spacing:1px;text-transform:uppercase;font-size:12px;font-weight:600}
-.next .nt{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;min-width:62px}
-.next.busy .ring{animation:spin 1s linear infinite}
-.next.busy .ring .fg{stroke-dashoffset:44!important;transition:none}
-@keyframes spin{from{transform:rotate(-90deg)}to{transform:rotate(270deg)}}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -143,8 +132,6 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 <div class="band"><img src="data:image/png;base64,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" alt="luvelo">
   <div class="title">Support summary</div>
   <div class="right"><div class="when" id="when">Loading…</div>
-    <div class="next" id="next"><svg class="ring" viewBox="0 0 26 26"><circle class="bg" cx="13" cy="13" r="10"/><circle class="fg" id="ringfg" cx="13" cy="13" r="10" style="stroke-dashoffset:62.83"/></svg>
-      <div><div class="nl" id="nextlbl">Next update</div><div class="nt" id="nexttime">--:--</div></div></div>
     <div class="live sample" id="live"><span class="pulse"></span><span id="livetxt">LOADING</span></div></div></div>
 <div class="stale" id="stale">Data may be out of date: the last successful refresh was over 30 minutes ago.</div>
 <main id="main" class="intro">
@@ -161,7 +148,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
     <div class="card"><h3>Open by customer</h3><div id="customers"></div></div>
   </div>
 </main>
-<footer>Live from Intercom · Open counts conversations in the open state · First response is Intercom's native measure and does not see replies made in Slack · Day boundaries in SAST</footer>
+<footer>Live from Intercom · Open counts conversations in the open state · First response is Intercom's native measure and does not see replies made in Slack · Day boundaries in SAST · <span id="pagever"></span></footer>
 </div>
 <script>
 const REFRESH_MS = 5 * 60 * 1000;   // re-read data.json this often
@@ -172,28 +159,9 @@ const TYPE_COLOURS = {"Product Bug":"#2a78d6","Feature Request":"#eb6834","User 
 const NEUTRAL = "#9AA4B2";
 const PRI = {Critical:"#D03B3B", High:"#EC835A", Medium:"#FAB219"};
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const POLL_BUSY_MS = 30 * 1000;     // once an update is due, check this often until it lands
-
-// The data refresh schedule. Keep this in step with the two cron lines in
-// .github/workflows/refresh.yml (times are UTC; SAST is UTC+2).
-function isScheduled(d) {
-  const m = d.getUTCMinutes(), h = d.getUTCHours(), dow = d.getUTCDay();
-  const supportHours = m % 15 === 0 && h >= 5 && h <= 16 && dow >= 1 && dow <= 5;  // */15 5-16 * * 1-5
-  const everyThree = m === 0 && h % 3 === 0;                                        // 0 */3 * * *
-  return supportHours || everyThree;
-}
-// First scheduled run strictly after the given epoch (seconds), and the one before it.
-function slotAfter(epoch) {
-  const t = new Date(Math.floor(epoch / 60) * 60000 + 60000);
-  for (let i = 0; i < 6 * 24 * 60; i++, t.setTime(t.getTime() + 60000)) if (isScheduled(t)) return t.getTime() / 1000;
-  return epoch + 3 * 3600;
-}
-function slotBefore(epoch) {
-  const t = new Date(Math.floor(epoch / 60) * 60000);
-  for (let i = 0; i < 6 * 24 * 60; i++, t.setTime(t.getTime() - 60000)) if (isScheduled(t)) return t.getTime() / 1000;
-  return epoch - 3 * 3600;
-}
-let dueAt = 0, dueFrom = 0, lastPoll = 0;
+// Bump this whenever the page changes, so you can see on the TV which version it is running.
+const PAGE_VERSION = "2026-11-12.7";
+let lastPoll = 0;
 
 // Last values shown, so a refresh animates from the old figure to the new one
 // instead of replaying everything from zero every five minutes.
@@ -284,8 +252,6 @@ function render(d) {
   animate();
   lastEpoch = d.snapshot_epoch;
   isSample = !!d.sample;
-  dueAt = slotAfter(isSample ? Date.now() / 1000 : lastEpoch);   // the run that will replace this data
-  dueFrom = slotBefore(dueAt - 60);
   updateClock();
   if (!firstRender) { $("live").classList.remove("flash"); void $("live").offsetWidth; $("live").classList.add("flash"); }
   if (firstRender) setTimeout(() => $("main").classList.remove("intro"), 2000);
@@ -357,6 +323,15 @@ function drawByDay(rows, animateIn = firstRender) {
     `${g}${ax}${bars}${line}${dots}${labs}${xs}</svg>`;
 }
 
+// Fallbacks for signage players whose browser does not fire ResizeObserver for a page
+// that was loaded hidden: check the size every 2 seconds, and redraw (with the intro
+// animation) whenever the page becomes visible again, e.g. when Yodeck rotates to it.
+function redrawIfResized(withIntro) {
+  const box = $("byday"), size = `${box.clientWidth}x${box.clientHeight}`;
+  if (byDayRows && box.clientWidth >= 50 && (size !== byDaySize || withIntro)) drawByDay(byDayRows, withIntro || !byDaySize);
+}
+setInterval(() => redrawIfResized(false), 2000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) redrawIfResized(true); });
 if ("ResizeObserver" in window) {
   new ResizeObserver(() => {
     const box = $("byday"), size = `${box.clientWidth}x${box.clientHeight}`;
@@ -393,35 +368,12 @@ function updateClock() {
   const when = new Date(lastEpoch * 1000).toLocaleTimeString("en-GB",
     {hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg"});
   const ago = mins < 1 ? "just now" : mins === 1 ? "1 min ago" : mins < 120 ? `${mins} min ago` : `${Math.floor(mins / 60)} h ago`;
-  $("when").textContent = `Updated ${when} SAST · ${ago}`;
+  $("when").textContent = `Last updated ${when} SAST · ${ago}`;
   const stale = mins > STALE_MIN, live = $("live");
   live.classList.toggle("sample", isSample);
   live.classList.toggle("delayed", stale && !isSample);
   $("livetxt").textContent = isSample ? "SAMPLE DATA" : stale ? "DELAYED" : "LIVE";
   $("stale").style.display = stale && !isSample ? "block" : "none";
-}
-
-// Header countdown to the next scheduled refresh, and the ring showing progress towards it.
-function tick() {
-  const now = Date.now() / 1000;
-  if (dueAt) {
-    const left = dueAt - now, el = $("next");
-    if (left > 0) {
-      const s = Math.ceil(left), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
-      $("nexttime").textContent = h ? `${h}h ${String(m).padStart(2, "0")}m` : `${m}:${String(sec).padStart(2, "0")}`;
-      $("nextlbl").textContent = "Next update";
-      el.classList.remove("busy");
-      const span = Math.max(60, dueAt - dueFrom), done = Math.min(1, Math.max(0, (now - dueFrom) / span));
-      $("ringfg").style.strokeDashoffset = (62.83 * (1 - done)).toFixed(2);
-    } else {
-      // GitHub can start scheduled runs late, and the deploy takes a minute or two.
-      el.classList.add("busy");
-      $("nextlbl").textContent = -left > 20 * 60 ? "Update running late" : "Updating";
-      $("nexttime").textContent = "now";
-    }
-  }
-  const busy = dueAt && now >= dueAt;
-  if (Date.now() - lastPoll > (busy ? POLL_BUSY_MS : REFRESH_MS)) load();
 }
 
 // Yodeck keeps this page open indefinitely, so check whether index.html itself has
@@ -458,10 +410,11 @@ function fit() {
   st.style.left = (innerWidth - 1920 * s) / 2 + "px";
   st.style.top = (innerHeight - 1080 * s) / 2 + "px";
 }
+$("pagever").textContent = `Page version ${PAGE_VERSION}`;
 addEventListener("resize", fit);
 fit();
 load();
-setInterval(tick, 1000);
+setInterval(load, REFRESH_MS);
 setInterval(updateClock, 30 * 1000);
 </script>
 </body></html>
