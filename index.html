@@ -244,7 +244,8 @@ function render(d) {
     tile("frt", "Median first response", d.frt.median_sec,
          `Past week, Intercom replies only · ${d.frt.answered} of ${d.frt.total} answered`, "", "dur");
 
-  drawByDay(d.by_day);
+  try { drawByDay(d.by_day || []); }
+  catch (e) { console.error(e); $("byday").innerHTML = `<p class="err">Chart could not be drawn: ${esc(e.message)}</p>`; }
 
   const ptop = Math.max(1, ...d.priority.map((r) => r.count));
   $("priority").innerHTML = d.priority.map((r) =>
@@ -297,8 +298,16 @@ function niceStep(raw) {
   const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
   return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
 }
-function drawByDay(rows) {
-  const box = $("byday"), W = box.clientWidth, H = box.clientHeight;
+let byDayRows = null, byDaySize = "";
+function drawByDay(rows, animateIn = firstRender) {
+  const box = $("byday");
+  byDayRows = rows;
+  // A signage player can load the page hidden, when the box measures 0x0. Draw nothing
+  // yet; the ResizeObserver below redraws as soon as the box has a real size.
+  const W = box.clientWidth, H = box.clientHeight;
+  if (W < 50 || H < 50) { byDaySize = ""; return; }
+  byDaySize = `${W}x${H}`;
+  rows = rows.map((r) => ({...r, new: Math.max(0, Number(r.new) || 0), resolved: Math.max(0, Number(r.resolved) || 0)}));
   const L = 44, R = 10, T = 26, B = 44;                       // plot margins
   const pw = W - L - R, ph = H - T - B;
   const peak = Math.max(1, ...rows.map((r) => Math.max(r.new, r.resolved)));
@@ -343,9 +352,16 @@ function drawByDay(rows) {
   const line = `<polyline class="res-line" pathLength="1" points="${pts.join(" ")}"/>`;
   box.classList.remove("intro", "fade");
   void box.offsetWidth;
-  box.classList.add(firstRender ? "intro" : "fade");
+  box.classList.add(animateIn ? "intro" : "fade");
   box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="New and resolved per day, past 7 days">` +
     `${g}${ax}${bars}${line}${dots}${labs}${xs}</svg>`;
+}
+
+if ("ResizeObserver" in window) {
+  new ResizeObserver(() => {
+    const box = $("byday"), size = `${box.clientWidth}x${box.clientHeight}`;
+    if (byDayRows && size !== byDaySize && box.clientWidth >= 50) drawByDay(byDayRows, !byDaySize);
+  }).observe($("byday"));
 }
 
 // Grow bars to their targets and count numbers to their values.
