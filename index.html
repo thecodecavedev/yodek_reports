@@ -30,7 +30,7 @@ main{flex:1;padding:18px 48px 12px;display:flex;flex-direction:column;gap:14px;m
 .r5 .val{font-size:46px}
 .cap{color:var(--ink2);font-size:15px;margin-top:2px}
 .cap.good{color:var(--good);font-weight:600}.cap.bad{color:var(--bad);font-weight:600}
-.charts{flex:1;display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:14px;min-height:0}
+.charts{flex:1;display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1.2fr 1fr;gap:14px;min-height:0}
 .card{border:1.5px solid var(--rule);border-radius:12px;padding:12px 22px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 .card h3{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--red)}
 .card .note{color:var(--muted);font-size:14px;margin-top:auto;padding-top:8px}
@@ -54,7 +54,7 @@ main{flex:1;padding:18px 48px 12px;display:flex;flex-direction:column;gap:14px;m
 .donutwrap{flex:1;display:flex;align-items:center;gap:36px;min-height:0}
 .donut{width:184px;height:184px;border-radius:50%;flex:none;display:grid;place-items:center}
 .hole{width:112px;height:112px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.hole b{font-size:32px;font-weight:800;line-height:1}.hole span{color:var(--muted);font-size:15px}
+.hole b{font-size:32px;font-weight:800;line-height:1}.hole>span{color:var(--muted);font-size:15px}
 .legend{display:grid;grid-template-columns:1fr 1fr;gap:9px 28px;flex:1}
 .li{display:flex;align-items:center;gap:9px;font-size:16px;white-space:nowrap}
 .sw{width:13px;height:13px;border-radius:3px;flex:none}
@@ -101,6 +101,29 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .val.bump{animation:bump .8s ease-out}
 @keyframes bump{0%{color:var(--ink)}30%{color:#129AFC}100%{color:var(--ink)}}
+/* ---------- new vs resolved (columns + line) ---------- */
+:root{--resline:#E07B00}
+.chead{display:flex;justify-content:space-between;align-items:baseline}.chead h3{margin-bottom:0}
+.chartbox{flex:1;min-height:0;position:relative;margin-top:6px}
+.chartbox svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.key .lk{display:inline-block;width:22px;height:3px;background:var(--resline);border-radius:2px;margin-right:8px;vertical-align:4px;position:relative}
+.key .lk::after{content:"";position:absolute;left:7px;top:-3.5px;width:9px;height:9px;border-radius:50%;background:var(--resline);border:2px solid #fff;box-sizing:border-box}
+.g-grid line{stroke:#E8ECF1;stroke-width:1}
+.g-ax text{fill:var(--muted);font-size:14px}
+.g-x .d{fill:var(--ink);font-size:16px;font-weight:700}.g-x .s{fill:var(--muted);font-size:13px}
+.col-bar{fill:var(--new);transform-box:fill-box;transform-origin:50% 100%}
+.v-in{fill:#fff;font-size:16px;font-weight:700}.v-out{fill:#1F5FB0;font-size:16px;font-weight:700}
+.res-line{fill:none;stroke:var(--resline);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.res-dot{fill:var(--resline);stroke:#fff;stroke-width:3}
+.res-lab{fill:#B35F00;font-size:16px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+.chartbox.intro .col-bar{animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+.chartbox.intro .res-line{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.3s ease-in-out 1.1s forwards}
+.chartbox.intro .res-dot,.chartbox.intro .res-lab,.chartbox.intro .v-in,.chartbox.intro .v-out{animation:pop .4s ease-out both}
+.chartbox.fade svg{animation:fadein .6s ease-out}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:.25}to{opacity:1}}
 /* ---------- next update countdown ---------- */
 .next{display:flex;align-items:center;gap:10px;color:#fff;font-size:15px}
 .next .ring{width:26px;height:26px;transform:rotate(-90deg);flex:none}
@@ -130,9 +153,9 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
   <p class="eyebrow">Today and yesterday</p>
   <div class="row r5" id="row2"></div>
   <div class="charts">
-    <div class="card"><h3>New vs resolved, past 7 days</h3>
-      <div class="key"><span><i style="background:var(--new)"></i>New</span><span><i style="background:var(--res)"></i>Resolved</span></div>
-      <div class="cols" id="byday"></div></div>
+    <div class="card"><div class="chead"><h3>New vs resolved, past 7 days</h3>
+      <div class="key"><span><i style="background:var(--new)"></i>New</span><span><b class="lk"></b>Resolved</span></div></div>
+      <div class="chartbox" id="byday"></div></div>
     <div class="card"><h3>Open by priority</h3><div id="priority"></div><div class="note" id="prinote"></div></div>
     <div class="card"><h3>Open by ticket type</h3><div class="donutwrap" id="types"></div></div>
     <div class="card"><h3>Open by customer</h3><div id="customers"></div></div>
@@ -221,18 +244,7 @@ function render(d) {
     tile("frt", "Median first response", d.frt.median_sec,
          `Past week, Intercom replies only · ${d.frt.answered} of ${d.frt.total} answered`, "", "dur");
 
-  const top = Math.max(1, ...d.by_day.map((r) => Math.max(r.new, r.resolved)));
-  $("byday").innerHTML = d.by_day.map((r, i) => {
-    const bar = (n, cls, k) => {
-      const pct = n ? Math.max(3, Math.round(n / top * 100)) : 1.5;
-      const delay = firstRender ? `transition-delay:${0.5 + i * 0.07}s;` : "";
-      return `<div class="bw"><span class="bv${n ? "" : " z"}">${num(k, n)}</span>` +
-        `<div class="bar ${cls}" ${size(k, pct, "height").replace('style="', 'style="' + delay)}></div></div>`;
-    };
-    const k = r.date.replace(/\s/g, "");
-    return `<div class="col"><div class="pair">${bar(r.new, "bn", "n" + k)}${bar(r.resolved, "br", "r" + k)}</div>` +
-      `<div class="dl"><b>${r.day}</b>${r.date}</div></div>`;
-  }).join("");
+  drawByDay(d.by_day);
 
   const ptop = Math.max(1, ...d.priority.map((r) => r.count));
   $("priority").innerHTML = d.priority.map((r) =>
@@ -277,6 +289,63 @@ function render(d) {
   if (!firstRender) { $("live").classList.remove("flash"); void $("live").offsetWidth; $("live").classList.add("flash"); }
   if (firstRender) setTimeout(() => $("main").classList.remove("intro"), 2000);
   firstRender = false;
+}
+
+// New vs resolved: blue columns for New, an orange line with dots for Resolved,
+// on ONE shared scale so the two can be compared directly.
+function niceStep(raw) {
+  const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+  return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+}
+function drawByDay(rows) {
+  const box = $("byday"), W = box.clientWidth, H = box.clientHeight;
+  const L = 44, R = 10, T = 26, B = 44;                       // plot margins
+  const pw = W - L - R, ph = H - T - B;
+  const peak = Math.max(1, ...rows.map((r) => Math.max(r.new, r.resolved)));
+  const step = niceStep(peak / 4), ymax = Math.ceil(peak * 1.12 / step) * step;
+  const y = (v) => T + ph - (v / ymax) * ph;
+  const band = pw / rows.length, bw = Math.min(64, band * 0.42);
+  const cx = (i) => L + band * i + band / 2;
+  let g = '<g class="g-grid">', ax = '<g class="g-ax">';
+  for (let v = 0; v <= ymax + 1e-9; v += step) {
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`;
+    ax += `<text x="${L - 12}" y="${y(v) + 5}" text-anchor="end">${Math.round(v * 10) / 10}</text>`;
+  }
+  g += "</g>"; ax += "</g>";
+  let bars = "", xs = '<g class="g-x">', pts = [], dots = "", labs = "";
+  rows.forEach((r, i) => {
+    const x = cx(i), top = y(r.new), h = T + ph - top, delay = (0.35 + i * 0.07).toFixed(2);
+    bars += `<rect class="col-bar" x="${x - bw / 2}" y="${top}" width="${bw}" height="${Math.max(h, r.new ? 2 : 1)}" rx="4" style="animation-delay:${delay}s"/>`;
+    // value inside the top of a tall bar, above a short one
+
+    xs += `<text class="d" x="${x}" y="${H - 24}" text-anchor="middle">${r.day}</text><text class="s" x="${x}" y="${H - 6}" text-anchor="middle">${r.date}</text>`;
+    const py = y(r.resolved);
+    pts.push(`${x},${py}`);
+    const dd = (1.2 + i * 0.16).toFixed(2);
+    dots += `<circle class="res-dot" cx="${x}" cy="${py}" r="7" style="animation-delay:${dd}s"/>`;
+    // Place both labels so neither overlaps the other, the dot, or sits on the blue bar.
+    const base = T + ph, barTop = r.new ? top : base;
+    const inBar = (ly) => r.new && ly > barTop + 2 && ly - 14 < base;           // text box is ly-14..ly+2
+    const hitsDot = (ty) => ty + 2 > py - 9 && ty - 14 < py + 9;
+    const barSpots = [barTop - 8, barTop - 30];
+    const dotSpots = [py - 14, py - 34, py + 28].filter((v) => v > 14 && v < base - 2 && !inBar(v));
+    let by = barTop - 8, ly = null;
+    outer: for (const b of barSpots) {
+      if (hitsDot(b)) continue;
+      for (const l of dotSpots) if (Math.abs(b - l) >= 21) { by = b; ly = l; break outer; }
+    }
+    if (ly === null) { by = barTop - 8; ly = Math.min(by, py) - 24; if (hitsDot(by)) by = py + 26 < barTop ? py + 26 : ly - 22; }
+    const ld = (+delay + .7).toFixed(2);
+    bars += `<text class="v-out" x="${x}" y="${by}" text-anchor="middle" style="animation-delay:${ld}s">${r.new}</text>`;
+    labs += `<text class="res-lab" x="${x}" y="${ly}" text-anchor="middle" style="animation-delay:${dd}s">${r.resolved}</text>`;
+  });
+  xs += "</g>";
+  const line = `<polyline class="res-line" pathLength="1" points="${pts.join(" ")}"/>`;
+  box.classList.remove("intro", "fade");
+  void box.offsetWidth;
+  box.classList.add(firstRender ? "intro" : "fade");
+  box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="New and resolved per day, past 7 days">` +
+    `${g}${ax}${bars}${line}${dots}${labs}${xs}</svg>`;
 }
 
 // Grow bars to their targets and count numbers to their values.
