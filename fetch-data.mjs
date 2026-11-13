@@ -1,6 +1,7 @@
 // Pulls the support figures from Intercom and writes, next to this script:
 //   data.json          screen 1, the support summary   (index.html)
 //   satisfaction.json  screen 3, customer satisfaction (satisfaction.html)
+//   uptime.json        uptime screen (uptime.html), only when UPTIMEROBOT_API_KEY is set
 // Runs inside GitHub Actions (Node 20+, no dependencies). The token comes from
 // the INTERCOM_TOKEN repository secret and never reaches the published pages.
 //
@@ -10,6 +11,8 @@
 //   INTERCOM_REGION   us | eu | au        (default us)
 //   HIDE_CUSTOMERS    "true" to publish counts without customer names
 //   SHOW_TITLES       "false" to hide ticket titles on the satisfaction page (default shown)
+//   UPTIMEROBOT_API_KEY  UptimeRobot API key (use the read-only key) for uptime.json
+//   UPTIME_TARGET     uptime target for the downtime budget, e.g. 0.999 (default 99.9%)
 //   SHOW_COMMENTS     "true" to publish customers' rating comments (default hidden,
 //                     because the pages are public and comments can mention patients)
 
@@ -21,6 +24,9 @@ const TOKEN = process.env.INTERCOM_TOKEN;
 const HIDE_CUSTOMERS = process.env.HIDE_CUSTOMERS === "true";
 const OUT = new URL("./data.json", import.meta.url);
 const OUT_SAT = new URL("./satisfaction.json", import.meta.url);
+const OUT_UP = new URL("./uptime.json", import.meta.url);
+const UR_KEY = process.env.UPTIMEROBOT_API_KEY;
+const UPTIME_TARGET = Number(process.env.UPTIME_TARGET) || 0.999;
 const SHOW_TITLES = process.env.SHOW_TITLES !== "false";
 const SHOW_COMMENTS = process.env.SHOW_COMMENTS === "true";
 
@@ -303,6 +309,120 @@ const data = await pull(keep);
 await writeFile(OUT, JSON.stringify(data, null, 2));
 console.log(`wrote data.json: ${data.open_total} open, ${data.new_today} new today`);
 
+// ------------------------------------------------------------- uptime (UptimeRobot)
+// Uses the UptimeRobot v2 getMonitors endpoint: uptime ratios plus down/up logs.
+// Log types: 1 = down, 2 = up, 98 = started, 99 = paused. Durations are in seconds.
+async function uptimeRobotMonitors() {
+  const out = [];
+  let offset = 0;
+  for (;;) {
+    const body = new URLSearchParams({
+      api_key: UR_KEY, format: "json", logs: "1", logs_limit: "300",
+      custom_uptime_ratios: "30-90", offset: String(offset), limit: "50",
+    });
+    const res = await fetch("https://api.uptimerobot.com/v2/getMonitors", {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded", "Cache-Control": "no-cache" }, body,
+    });
+    if (!res.ok) throw new Error(`UptimeRobot ${res.status}`);
+    const j = await res.json();
+    if (j.stat !== "ok") throw new Error(`UptimeRobot: ${JSON.stringify(j.error || j).slice(0, 200)}`);
+    out.push(...(j.monitors || []));
+    const p = j.pagination || {};
+    offset += p.limit || 50;
+    if (!p.total || offset >= p.total) return out;
+  }
+}
+
+const sastKey = (epoch) => new Date(epoch * 1000 + SAST_MS).toISOString().slice(0, 10);
+const nextSastMidnight = (epoch) => {
+  const d = new Date(epoch * 1000 + SAST_MS);
+  d.setUTCHours(24, 0, 0, 0);
+  return (d.getTime() - SAST_MS) / 1000;
+};
+function causeLabel(reason) {
+  const detail = (reason?.detail || "").trim(), code = String(reason?.code || "");
+  if (!detail && !code) return "Unknown";
+  const pretty = detail ? detail.charAt(0).toUpperCase() + detail.slice(1).toLowerCase() : `Error ${code}`;
+  return /^[1-5]\d\d$/.test(code) && !pretty.includes(code) ? `${pretty} (${code})` : pretty;
+}
+
+async function pullUptime() {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const todayStart = sastDay(0).epoch, m30 = nowSec - 30 * 86400;
+  const days90 = Array.from({ length: 90 }, (_, i) => sastKey(sastDay(89 - i).epoch + 3600));
+  const raw = await uptimeRobotMonitors();
+  const incidents = [];
+  const monitors = raw.map((m) => {
+    const status = m.status === 0 ? "paused" : (m.status === 8 || m.status === 9) ? "down" : "up";
+    const logs = (m.logs || []).slice().sort((a, b) => b.datetime - a.datetime);
+    const perDay = {};
+    let down30 = 0, inc30 = 0;
+    logs.forEach((l, idx) => {
+      if (l.type !== 1) return;
+      // The newest down log of a monitor that is down now is still running.
+      let dur = Number(l.duration) || 0;
+      const ongoing = status === "down" && idx === logs.findIndex((x) => x.type === 1);
+      if (ongoing) dur = Math.max(dur, nowSec - l.datetime);
+      let start = l.datetime, left = dur;
+      while (left > 0) {                       // split across SAST days
+        const chunk = Math.min(left, nextSastMidnight(start) - start);
+        const k = sastKey(start);
+        perDay[k] = (perDay[k] || 0) + chunk;
+        start += chunk; left -= chunk;
+      }
+      if (l.datetime >= m30) {
+        inc30 += 1; down30 += Math.min(dur, nowSec - m30);
+        incidents.push({ monitor: m.friendly_name, epoch: l.datetime, duration: dur, ongoing,
+                         cause: causeLabel(l.reason), today: l.datetime >= todayStart });
+      }
+    });
+    const ratios = String(m.custom_uptime_ratio || "").split("-").map(Number);
+    const lastUp = logs.find((l) => l.type === 2 || l.type === 98);
+    const lastDown = logs.find((l) => l.type === 1);
+    const since = status === "up" ? (lastUp?.datetime || m.create_datetime) : status === "down" ? lastDown?.datetime : null;
+    return {
+      id: m.id, name: m.friendly_name, status, since_epoch: since || null,
+      uptime_30: Number.isFinite(ratios[0]) ? ratios[0] : null,
+      uptime_90: Number.isFinite(ratios[1]) ? ratios[1] : null,
+      down_30_sec: down30, incidents_30: inc30,
+      days: days90.map((d) => perDay[d] || 0),
+    };
+  });
+
+  const active = monitors.filter((m) => m.status !== "paused");
+  const today = incidents.filter((i) => i.today).sort((a, b) => b.epoch - a.epoch);
+  const done = incidents.filter((i) => !i.ongoing).map((i) => i.duration);
+  const causes = {};
+  for (const i of incidents) causes[i.cause] = (causes[i.cause] || 0) + 1;
+  const ratios30 = active.map((m) => m.uptime_30).filter((v) => v != null);
+  const last7 = Array.from({ length: 7 }, (_, i) => sastDay(6 - i));
+  return {
+    snapshot_epoch: nowSec,
+    target: UPTIME_TARGET,
+    budget_sec: Math.round(30 * 86400 * (1 - UPTIME_TARGET)),
+    days_90: days90,
+    monitors,
+    totals: {
+      up: monitors.filter((m) => m.status === "up").length,
+      down: monitors.filter((m) => m.status === "down").length,
+      paused: monitors.filter((m) => m.status === "paused").length,
+      incidents_today: today.length,
+      down_today_sec: active.reduce((a, m) => a + m.days[89], 0),
+      today_latest: today[0] || null,
+      uptime_30: ratios30.length ? ratios30.reduce((a, v) => a + v, 0) / ratios30.length : null,
+      incidents_30: incidents.length,
+      down_30_sec: monitors.reduce((a, m) => a + m.down_30_sec, 0),
+      median_recovery_sec: median(done),
+    },
+    per_day_7: last7.map(({ date }, i) => ({
+      day: dayName(date), date: dayLabel(date),
+      down_sec: active.reduce((a, m) => a + m.days[83 + i], 0),
+    })),
+    causes_30: Object.entries(causes).map(([cause, count]) => ({ cause, count })).sort((a, b) => b.count - a.count),
+    latest: incidents.sort((a, b) => b.epoch - a.epoch).slice(0, 4),
+  };
+}
+
 // A failure here must not stop screen 1 from updating, so it is caught separately.
 try {
   const sat = await pullSatisfaction(keep.open || []);
@@ -310,4 +430,16 @@ try {
   console.log(`wrote satisfaction.json: ${sat.week.ratings_left} ratings this week, ${sat.week.negative} negative`);
 } catch (e) {
   console.error("satisfaction pull failed (screen 1 still updated):", e.message);
+}
+
+if (UR_KEY) {
+  try {
+    const up = await pullUptime();
+    await writeFile(OUT_UP, JSON.stringify(up, null, 2));
+    console.log(`wrote uptime.json: ${up.totals.up} up, ${up.totals.down} down, ${up.totals.incidents_30} incidents in 30 days`);
+  } catch (e) {
+    console.error("uptime pull failed (other screens still updated):", e.message);
+  }
+} else {
+  console.log("UPTIMEROBOT_API_KEY not set: skipped uptime.json");
 }
