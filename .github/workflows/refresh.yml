@@ -28,6 +28,7 @@ jobs:
       - run: node ./fetch-data.mjs
         env:
           INTERCOM_TOKEN: ${{ secrets.INTERCOM_TOKEN }}
+          UPTIMEROBOT_API_KEY: ${{ secrets.UPTIMEROBOT_API_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
