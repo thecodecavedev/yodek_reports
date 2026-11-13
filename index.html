@@ -151,7 +151,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
       <div class="key"><span><i style="background:var(--new)"></i>New</span><span><b class="lk"></b>Resolved</span></div></div>
       <div class="chartbox" id="byday"></div></div>
     <div class="card"><h3>Open by priority</h3><div id="priority"></div><div class="note" id="prinote"></div></div>
-    <div class="card"><h3>Open by ticket type</h3><div class="donutwrap" id="types"></div></div>
+    <div class="card"><h3>Open by ticket type, opened past 7 days</h3><div class="donutwrap" id="types"></div></div>
     <div class="card"><h3>Open by customer</h3><div id="customers"></div></div>
   </div>
 </main>
@@ -167,7 +167,7 @@ const NEUTRAL = "#9AA4B2";
 const PRI = {Critical:"#D03B3B", High:"#EC835A", Medium:"#FAB219"};
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Bump this whenever the page changes, so you can see on the TV which version it is running.
-const PAGE_VERSION = "2026-11-13.8";
+const PAGE_VERSION = "2026-11-13.10";
 let lastPoll = 0;
 
 // Last values shown, so a refresh animates from the old figure to the new one
@@ -231,10 +231,12 @@ function render(d) {
   const ch = d.priority.filter((r) => r.label !== "Medium").reduce((a, r) => a + r.count, 0);
   $("prinote").textContent = `Critical and High together: ${ch} of ${int(d.open_total)} open`;
 
-  const total = d.types.reduce((a, r) => a + r.count, 0);
+  // Opened in the past 7 days and still open; falls back to all open tickets for older data.json files.
+  const typeRows = d.types_7d || d.types, typeLabel = "open";
+  const total = typeRows.reduce((a, r) => a + r.count, 0);
   let start = 0;
   const stops = [], legend = [];
-  for (const r of d.types) {
+  for (const r of typeRows) {
     const c = TYPE_COLOURS[r.type] || NEUTRAL, share = total ? r.count / total * 100 : 0;
     stops.push(`${c} ${start.toFixed(2)}% ${(start + share).toFixed(2)}%`);
     start += share;
@@ -242,7 +244,7 @@ function render(d) {
       `<b>${r.count}</b><span class="lp">${share > 0 && share < 1 ? "<1%" : share.toFixed(0) + "%"}</span></div>`);
   }
   $("types").innerHTML = `<div class="donut${firstRender ? " sweep" : ""}" style="background:conic-gradient(${stops.join(",") || NEUTRAL + " 0 100%"});animation-delay:.6s">` +
-    `<div class="hole"><b>${num("tt", total)}</b><span>open</span></div></div><div class="legend">${legend.join("")}</div>`;
+    `<div class="hole"><b>${num("tt", total)}</b><span>${typeLabel}</span></div></div><div class="legend">${legend.join("")}</div>`;
 
   let rows = d.customers.slice(0, 4);
   const rest = d.customers.slice(4);
