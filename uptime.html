@@ -217,7 +217,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 <script>
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 30;
-const PAGE_VERSION = "2026-11-13.u3";
+const PAGE_VERSION = "2026-11-13.u4";
 const CAUSE_COLOURS = ["#2a78d6", "#EC835A", "#F2B33D", "#1D9E75", "#4a3aa7", "#9AA4B2"];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const prevNum = {};
@@ -257,6 +257,8 @@ function whenLabel(e) {
 const dayClass = (s) => s <= 0 ? "" : s < 300 ? "d1" : s <= 1800 ? "d2" : "d3";
 
 function render(d) {
+  lastData = d;
+  if (firstRender) renderedHidden = isHidden();
   const t = d.totals, active = d.monitors.filter((m) => m.status !== "paused").length;
   const latestToday = t.today_latest;
   $("tiles").innerHTML =
@@ -372,6 +374,24 @@ async function load() {
   }
 }
 
+// Yodeck often loads a screen in the background before showing it, so the intro would
+// play unseen. Replay it when the page actually comes into view: when it gets a real
+// size after loading hidden, or when the tab becomes visible again.
+let lastData = null, renderedHidden = false;
+const isHidden = () => document.hidden || innerWidth < 50 || innerHeight < 50;
+function replayIntro() {
+  if (!lastData) return;
+  firstRender = true;
+  for (const k in prevNum) delete prevNum[k];
+  $("main").classList.add("intro");
+  render(lastData);
+}
+function maybeReplay() {
+  if (renderedHidden && !isHidden()) { renderedHidden = false; replayIntro(); }
+}
+setInterval(maybeReplay, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) replayIntro(); });
+
 function fit() {
   const s = Math.min(innerWidth / 1920, innerHeight / 1080), st = $("stage");
   st.style.transform = `scale(${s})`;
@@ -379,7 +399,7 @@ function fit() {
   st.style.top = (innerHeight - 1080 * s) / 2 + "px";
 }
 $("pagever").textContent = `Page version ${PAGE_VERSION}`;
-addEventListener("resize", fit);
+addEventListener("resize", () => { fit(); maybeReplay(); });
 fit();
 load();
 setInterval(load, REFRESH_MS);
