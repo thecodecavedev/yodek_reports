@@ -154,6 +154,13 @@ async function pull(keep) {
   // Native Intercom first response: median time_to_admin_reply, past 7 days.
   const week = await all(since("created_at", b[6].epoch));
   const replies = week.map((c) => c.statistics?.time_to_admin_reply).filter(Boolean);
+  // Opened in the past 7 days and still open, by ticket type.
+  const types7 = {};
+  for (const c of week) {
+    if (c.state !== "open") continue;
+    const t = ticketType(c);
+    types7[t] = (types7[t] || 0) + 1;
+  }
 
   // One pass over every open conversation feeds priority, type and customer.
   const open = await all(q("state", "=", "open"));
@@ -188,6 +195,9 @@ async function pull(keep) {
     frt: { median_sec: median(replies), answered: replies.length, total: week.length },
     by_day: byDay,
     priority: PRIORITIES.map((label) => ({ label, count: pri[label] || 0 })),
+    types_7d: Object.entries(types7)
+      .map(([type, n]) => ({ type, count: n }))
+      .sort((x, y) => (x.type === "Not Defined") - (y.type === "Not Defined") || y.count - x.count),
     types: Object.entries(types)
       .map(([type, n]) => ({ type, count: n }))
       .sort((x, y) => (x.type === "Not Defined") - (y.type === "Not Defined") || y.count - x.count),
@@ -280,6 +290,8 @@ async function pullSatisfaction(open) {
       items: reopened.slice(0, 6).map((c) => ({
         id: String(c.id), customer: label(c), title: SHOW_TITLES ? ticketTitle(c) : "",
         type: ticketType(c), reopens: c.statistics.count_reopens,
+        age_days: Math.floor((nowSec - c.created_at) / 86400),
+        last_reply_epoch: c.statistics.last_contact_reply_at || null,
       })),
     },
     comments_shown: SHOW_COMMENTS,
