@@ -188,7 +188,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 <script>
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 30;
-const PAGE_VERSION = "2026-11-13.s3";
+const PAGE_VERSION = "2026-11-13.s4";
 const STAR_COLOURS = {1: "#D03B3B", 2: "#EC835A", 3: "#B4B2A9", 4: "#5DCAA5", 5: "#1D9E75"};
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const prevNum = {};
@@ -216,6 +216,8 @@ const tile = (key, label, value, cap = "", cls = "", fmt = "int", tileCls = "") 
   (cap ? `<div class="cap">${cap}</div>` : "") + `</div>`;
 
 function render(d) {
+  lastData = d;
+  if (firstRender) renderedHidden = isHidden();
   const w = d.week, rate = w.requested ? (w.answered / w.requested) * 100 : null;
   $("tiles").innerHTML =
     tile("left", "Ratings left", w.ratings_left, w.requested ? `${w.answered} of ${w.requested} requests this week answered` : "No rating requests yet this week") +
@@ -324,6 +326,24 @@ async function load() {
   }
 }
 
+// Yodeck often loads a screen in the background before showing it, so the intro would
+// play unseen. Replay it when the page actually comes into view: when it gets a real
+// size after loading hidden, or when the tab becomes visible again.
+let lastData = null, renderedHidden = false;
+const isHidden = () => document.hidden || innerWidth < 50 || innerHeight < 50;
+function replayIntro() {
+  if (!lastData) return;
+  firstRender = true;
+  for (const k in prevNum) delete prevNum[k];
+  $("main").classList.add("intro");
+  render(lastData);
+}
+function maybeReplay() {
+  if (renderedHidden && !isHidden()) { renderedHidden = false; replayIntro(); }
+}
+setInterval(maybeReplay, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) replayIntro(); });
+
 function fit() {
   const s = Math.min(innerWidth / 1920, innerHeight / 1080), st = $("stage");
   st.style.transform = `scale(${s})`;
@@ -331,7 +351,7 @@ function fit() {
   st.style.top = (innerHeight - 1080 * s) / 2 + "px";
 }
 $("pagever").textContent = `Page version ${PAGE_VERSION}`;
-addEventListener("resize", fit);
+addEventListener("resize", () => { fit(); maybeReplay(); });
 fit();
 load();
 setInterval(load, REFRESH_MS);
