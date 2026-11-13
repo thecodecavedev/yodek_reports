@@ -212,13 +212,12 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
     <div class="card"><h3>Latest incidents</h3><div id="latest"></div></div>
   </div>
 </main>
-<footer class="foot2"><span>Live from UptimeRobot · Downtime counted per day in SAST · Paused monitors are left out of the totals · <span id="pagever"></span></span>
-  <span class="chip2">SSL and domain expiry not tracked</span></footer>
+<footer class="foot2"><span>Live from UptimeRobot · Downtime counted per day in SAST · Paused monitors are left out of the totals · <span id="pagever"></span></span></footer>
 </div>
 <script>
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 30;
-const PAGE_VERSION = "2026-11-13.u2";
+const PAGE_VERSION = "2026-11-13.u3";
 const CAUSE_COLOURS = ["#2a78d6", "#EC835A", "#F2B33D", "#1D9E75", "#4a3aa7", "#9AA4B2"];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const prevNum = {};
