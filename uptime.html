@@ -218,7 +218,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 <script>
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 30;
-const PAGE_VERSION = "2026-11-13.u1";
+const PAGE_VERSION = "2026-11-13.u2";
 const CAUSE_COLOURS = ["#2a78d6", "#EC835A", "#F2B33D", "#1D9E75", "#4a3aa7", "#9AA4B2"];
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const prevNum = {};
@@ -237,6 +237,8 @@ function dur(sec, short) {
   if (h) return `${h}h ${String(m).padStart(2, "0")}m`;
   return m ? `${m}m ${String(s).padStart(2, "0")}s` : `${s}s`;
 }
+// One decimal place, rounded DOWN, so any downtime at all never displays as 100%.
+const pct1 = (v) => v == null ? "n/a" : v >= 100 ? "100%" : (Math.floor(v * 10) / 10).toFixed(1) + "%";
 const pctFmt = (dp) => (v) => v == null ? "n/a" : (v >= 100 ? "100" : v.toFixed(dp)) + "%";
 const FMT = {int, dur: (v) => dur(v), pct2: pctFmt(2)};
 function num(key, value, fmt = "int") {
@@ -274,7 +276,7 @@ function render(d) {
     const bars = m.days.map((s, i) => `<i class="${m.status === "paused" ? "na" : dayClass(s)}" style="animation-delay:${(0.4 + r * 0.08 + i * 0.006).toFixed(3)}s" title="${d.days_90[i]}: ${dur(s)}"></i>`).join("");
     return `<div class="mrow"><span class="mname">${esc(m.name)}</span><span class="pill ${m.status}">${m.status.toUpperCase()}</span>` +
       `<span class="msince">${since}</span><div class="days">${bars}</div>` +
-      `<span class="mpct">${m.uptime_90 == null ? "n/a" : (m.uptime_90 >= 100 ? "100" : m.uptime_90.toFixed(3)) + "%"}</span></div>`;
+      `<span class="mpct">${pct1(m.uptime_90)}</span></div>`;
   }).join("");
 
   const within = d.monitors.filter((m) => m.status !== "paused" && m.down_30_sec <= d.budget_sec).length;
