@@ -14,6 +14,8 @@
 //   SHOW_TITLES       "false" to hide ticket titles on the satisfaction page (default shown)
 //   UPTIMEROBOT_API_KEY  UptimeRobot API key (use the read-only key) for uptime.json
 //   UPTIME_TARGET     uptime target for the downtime budget, e.g. 0.999 (default 99.9%)
+//   SHOW_SUMMARIES    "true" to show Intercom's AI summary on each Critical/High ticket
+//                     (default hidden, because summaries condense what customers wrote)
 //   SHOW_COMMENTS     "true" to publish customers' rating comments (default hidden,
 //                     because the pages are public and comments can mention patients)
 
@@ -31,6 +33,7 @@ const UR_KEY = process.env.UPTIMEROBOT_API_KEY;
 const UPTIME_TARGET = Number(process.env.UPTIME_TARGET) || 0.999;
 const SHOW_TITLES = process.env.SHOW_TITLES !== "false";
 const SHOW_COMMENTS = process.env.SHOW_COMMENTS === "true";
+const SHOW_SUMMARIES = process.env.SHOW_SUMMARIES === "true";
 
 const ATTR_PRIORITY = "Priority Level";
 const ATTR_CUSTOMER = "Customer";
@@ -312,10 +315,28 @@ await writeFile(OUT, JSON.stringify(data, null, 2));
 console.log(`wrote data.json: ${data.open_total} open, ${data.new_today} new today`);
 
 // ------------------------------------------------------------- critical tickets
+// The latest Intercom AI summary on a conversation (a part of type conversation_summary),
+// as one short plain line. Summaries are created in Intercom by the inbox Summarize button
+// or a workflow's "Add summary note" step; a ticket without one returns "".
+async function latestSummary(id) {
+  const conv = await get(`/conversations/${id}?display_as=plaintext`);
+  const parts = (conv.conversation_parts?.conversation_parts || [])
+    .filter((p) => p.part_type === "conversation_summary" && p.body);
+  if (!parts.length) return "";
+  const latest = parts.sort((a, b) => b.created_at - a.created_at)[0];
+  return latest.body
+    .replace(/<[^>]+>/g, " ")                    // in case HTML slips through
+    .replace(/^\s*(ai\s+)?summary\s*[:\-]?\s*/i, "")
+    .replace(/[•\-*]\s+/g, "")                   // bullet markers
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 220);
+}
+
 // Every conversation that is open right now with a Priority Level of Critical or High.
 // Tickets already marked Resolved are left out even if a later reply reopened the
 // conversation; snoozed conversations are not in the open state, so they are left out too.
-function pullCritical(open) {
+async function pullCritical(open) {
   const nowSec = Math.floor(Date.now() / 1000);
   const names = {};
   const label = (c) => {
@@ -335,8 +356,17 @@ function pullCritical(open) {
       state: (c.ticket?.state || "").toLowerCase(),          // submitted | in_progress | waiting_on_customer
       last_update_epoch: c.updated_at || c.created_at,
       title: SHOW_TITLES ? ticketTitle(c) : "",
+      summary: "",
     }));
-  return { snapshot_epoch: nowSec, open_total: open.length, tickets };
+  if (SHOW_SUMMARIES) {
+    // One request per ticket, 5 at a time. A failed lookup just leaves that ticket without a summary.
+    for (let i = 0; i < tickets.length; i += 5) {
+      await Promise.all(tickets.slice(i, i + 5).map(async (t) => {
+        try { t.summary = await latestSummary(t.id); } catch (e) { console.warn(`summary for ${t.id} failed:`, e.message); }
+      }));
+    }
+  }
+  return { snapshot_epoch: nowSec, open_total: open.length, tickets, summaries_shown: SHOW_SUMMARIES };
 }
 
 // ------------------------------------------------------------- uptime (UptimeRobot)
@@ -464,10 +494,12 @@ try {
 
 // Critical tickets reuse the open conversations already fetched for screen 1: no extra API calls.
 try {
-  const crit = pullCritical(keep.open || []);
+  const crit = await pullCritical(keep.open || []);
   await writeFile(OUT_CRIT, JSON.stringify(crit, null, 2));
   const n = (p) => crit.tickets.filter((t) => t.priority === p).length;
-  console.log(`wrote critical.json: ${n("Critical")} Critical, ${n("High")} High`);
+  const withSummary = crit.tickets.filter((t) => t.summary).length;
+  console.log(`wrote critical.json: ${n("Critical")} Critical, ${n("High")} High` +
+    (SHOW_SUMMARIES ? `, ${withSummary} with an AI summary` : ""));
 } catch (e) {
   console.error("critical pull failed (other screens still updated):", e.message);
 }
