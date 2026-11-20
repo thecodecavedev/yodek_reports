@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Luvelo Critical Tickets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--red:#FF3131;--ink:#14181F;--ink2:#4A5560;--muted:#78838F;--rule:#E2E7ED;
+  --panel:#F6F8FA;--good:#1E7A4C;--bad:#D03B3B;--amber:#F7D971;--amber-wash:#FFFBEF;
+  --new:#2a78d6;--res:#14181F}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#fff;overflow:hidden}
+body{font-family:Poppins,"Segoe UI",system-ui,sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased}
+#stage{width:1920px;height:1080px;transform-origin:0 0;position:absolute;top:0;left:0;display:flex;flex-direction:column}
+.band{height:84px;background:var(--red);display:flex;align-items:center;justify-content:space-between;padding:0 48px;flex:none}
+.band img{height:38px}
+.band .title{color:#fff;font-weight:700;font-size:18px;letter-spacing:3px;text-transform:uppercase}
+.band .when{color:#fff;font-size:16px;opacity:.92;text-align:right}
+.stale{display:none;background:var(--amber-wash);border-bottom:2px solid var(--amber);color:#7a5a00;
+  font-weight:600;font-size:18px;padding:8px 48px}
+main{flex:1;padding:18px 48px 12px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.eyebrow{color:var(--red);font-weight:700;font-size:13px;letter-spacing:2px;text-transform:uppercase;margin:0 0 -6px}
+.row{display:grid;gap:18px}
+.r4{grid-template-columns:repeat(4,1fr)}
+.r5{grid-template-columns:repeat(4,1fr) 1.35fr}
+.tile{border:1.5px solid var(--rule);border-radius:12px;padding:12px 22px 11px}
+.lab{color:var(--muted);font-weight:700;font-size:14px;letter-spacing:1.4px;text-transform:uppercase}
+.val{font-weight:800;font-size:52px;line-height:1.1;margin-top:2px;letter-spacing:-1px}
+.r5 .val{font-size:46px}
+.cap{color:var(--ink2);font-size:15px;margin-top:2px}
+.cap.good{color:var(--good);font-weight:600}.cap.bad{color:var(--bad);font-weight:600}
+.charts{flex:1;display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1.2fr 1fr;gap:14px;min-height:0}
+.card{border:1.5px solid var(--rule);border-radius:12px;padding:12px 22px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.card h3{margin:0 0 6px;font-size:15px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--red)}
+.card .note{color:var(--muted);font-size:14px;margin-top:auto;padding-top:8px}
+.key{display:flex;gap:22px;font-size:15px;color:var(--ink2)}
+.key i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+.cols{flex:1;display:flex;gap:16px;align-items:stretch;min-height:0;padding-top:4px}
+.col{flex:1;display:flex;flex-direction:column}
+.pair{flex:1;display:flex;gap:6px;align-items:flex-end}
+.bw{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+.bar{width:100%;border-radius:5px 5px 0 0}
+.bn{background:var(--new)}.br{background:var(--res)}
+.bv{font-weight:700;font-size:17px;margin-bottom:3px}.bv.z{color:var(--muted);font-weight:500}
+.dl{text-align:center;font-size:14px;color:var(--muted);margin-top:6px;line-height:1.25}
+.dl b{display:block;color:var(--ink);font-size:16px}
+.prow{display:grid;grid-template-columns:18px 110px 1fr 70px;align-items:center;gap:12px;margin:9px 0}
+.dot{width:14px;height:14px;border-radius:50%}
+.pl{font-size:20px;font-weight:600}
+.track{height:20px;background:var(--panel);border-radius:5px;overflow:hidden}
+.fill{height:100%;border-radius:5px}
+.pn{font-size:24px;font-weight:800;text-align:right}
+.donutwrap{flex:1;display:flex;align-items:center;gap:36px;min-height:0}
+.donut{width:184px;height:184px;border-radius:50%;flex:none;display:grid;place-items:center}
+.hole{width:112px;height:112px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.hole b{font-size:32px;font-weight:800;line-height:1}.hole>span{color:var(--muted);font-size:15px}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:9px 28px;flex:1}
+.li{display:flex;align-items:center;gap:9px;font-size:16px;white-space:nowrap}
+.sw{width:13px;height:13px;border-radius:3px;flex:none}
+.ln{color:var(--ink2);overflow:hidden;text-overflow:ellipsis}.li b{font-weight:700}.lp{color:var(--muted);font-size:14px}
+.crow{display:grid;grid-template-columns:230px 1fr 60px 80px;align-items:center;gap:14px;margin:4px 0;font-size:16px}
+.crow.head{color:var(--muted);font-size:13px;letter-spacing:1px;text-transform:uppercase;margin:0}
+.crow.head span:nth-child(n+3),.crow b,.ca{text-align:right}
+.cn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctrack{height:14px;background:var(--panel);border-radius:4px;overflow:hidden}
+.cfill{height:100%;background:var(--ink);border-radius:4px}
+.ca{color:var(--muted)}
+footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
+
+.err{color:var(--bad);font-size:20px;padding:40px 48px}
+
+/* ---------- live indicator ---------- */
+.band .right{display:flex;align-items:center;gap:18px}
+.live{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.16);border-radius:999px;
+  padding:6px 16px 6px 12px;color:#fff;font-weight:700;font-size:15px;letter-spacing:2px}
+.pulse{position:relative;width:14px;height:14px;border-radius:50%;background:#2EE66B;box-shadow:0 0 0 2px #fff}
+.pulse::after{content:"";position:absolute;inset:0;border-radius:50%;background:#2EE66B;animation:ping 1.8s cubic-bezier(0,0,.2,1) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.85}80%,100%{transform:scale(2.8);opacity:0}}
+.live.delayed .pulse,.live.delayed .pulse::after{background:#FFC53D}
+.live.sample .pulse,.live.sample .pulse::after{background:#C9CED6}
+.live.delayed .pulse::after,.live.sample .pulse::after{animation:none;opacity:0}
+.live.flash .pulse{animation:flash .9s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 2px #fff,0 0 0 0 rgba(255,255,255,.9)}100%{box-shadow:0 0 0 2px #fff,0 0 0 14px rgba(255,255,255,0)}}
+
+/* ---------- motion ---------- */
+.bar{transition:height 1s cubic-bezier(.2,.8,.2,1)}
+.fill,.cfill{transition:width 1s cubic-bezier(.2,.8,.2,1)}
+@property --sweep{syntax:"<angle>";inherits:false;initial-value:360deg}
+.donut{-webkit-mask:conic-gradient(#000 var(--sweep),transparent 0);mask:conic-gradient(#000 var(--sweep),transparent 0)}
+.donut.sweep{animation:sweep 1.3s cubic-bezier(.3,.7,.2,1) both}
+@keyframes sweep{from{--sweep:0deg}to{--sweep:360deg}}
+.intro .tile,.intro .card{animation:rise .7s cubic-bezier(.2,.8,.2,1) both}
+.intro .r4 .tile:nth-child(2){animation-delay:.06s}.intro .r4 .tile:nth-child(3){animation-delay:.12s}
+.intro .r4 .tile:nth-child(4){animation-delay:.18s}
+.intro .r5 .tile:nth-child(1){animation-delay:.22s}.intro .r5 .tile:nth-child(2){animation-delay:.27s}
+.intro .r5 .tile:nth-child(3){animation-delay:.32s}.intro .r5 .tile:nth-child(4){animation-delay:.37s}
+.intro .r5 .tile:nth-child(5){animation-delay:.42s}
+.intro .card:nth-child(1){animation-delay:.45s}.intro .card:nth-child(2){animation-delay:.52s}
+.intro .card:nth-child(3){animation-delay:.59s}.intro .card:nth-child(4){animation-delay:.66s}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.val.bump{animation:bump .8s ease-out}
+@keyframes bump{0%{color:var(--ink)}30%{color:#129AFC}100%{color:var(--ink)}}
+/* ---------- new vs resolved (columns + line) ---------- */
+:root{--resline:#E07B00}
+.chead{display:flex;justify-content:space-between;align-items:baseline}.chead h3{margin-bottom:0}
+.chartbox{flex:1;min-height:0;position:relative;margin-top:6px}
+.chartbox svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.key .lk{display:inline-block;width:22px;height:3px;background:var(--resline);border-radius:2px;margin-right:8px;vertical-align:4px;position:relative}
+.key .lk::after{content:"";position:absolute;left:7px;top:-3.5px;width:9px;height:9px;border-radius:50%;background:var(--resline);border:2px solid #fff;box-sizing:border-box}
+.g-grid line{stroke:#E8ECF1;stroke-width:1}
+.g-ax text{fill:var(--muted);font-size:14px}
+.g-x .d{fill:var(--ink);font-size:16px;font-weight:700}.g-x .s{fill:var(--muted);font-size:13px}
+.col-bar{fill:var(--new);transform-box:fill-box;transform-origin:50% 100%}
+.v-in{fill:#fff;font-size:16px;font-weight:700}.v-out{fill:#1F5FB0;font-size:16px;font-weight:700}
+.res-line{fill:none;stroke:var(--resline);stroke-width:3.5;stroke-linejoin:round;stroke-linecap:round}
+.res-dot{fill:var(--resline);stroke:#fff;stroke-width:3}
+.res-lab{fill:#B35F00;font-size:16px;font-weight:700;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}
+.chartbox.intro .col-bar{animation:grow .9s cubic-bezier(.2,.8,.2,1) both}
+.chartbox.intro .res-line{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.3s ease-in-out 1.1s forwards}
+.chartbox.intro .res-dot,.chartbox.intro .res-lab,.chartbox.intro .v-in,.chartbox.intro .v-out{animation:pop .4s ease-out both}
+.chartbox.fade svg{animation:fadein .6s ease-out}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes fadein{from{opacity:.25}to{opacity:1}}
+
+/* ---------- brand lockup: logo | tagline ---------- */
+.band{display:grid;grid-template-columns:1fr auto 1fr}
+.band .right{justify-self:end}
+.brand{display:flex;align-items:center;gap:20px}
+.brand .divider{width:2px;height:36px;background:rgba(255,255,255,.55);border-radius:1px}
+.brand .tagline{color:#fff;font-size:22px;font-weight:400;letter-spacing:.2px;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+
+/* ---------- critical tickets screen ---------- */
+.tile.alert{border-color:var(--bad)}.tile.alert .val{color:var(--bad)}
+.tbl{flex:1;border:1.5px solid var(--rule);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.thd,.trw{display:grid;grid-template-columns:150px 300px 110px 190px 1fr 150px;gap:18px;align-items:center;padding:0 24px}
+.thd{background:var(--ink);color:#fff;font-size:13px;font-weight:700;letter-spacing:1.6px;height:46px;flex:none}
+.trows{flex:1;display:flex;flex-direction:column;min-height:0}
+.trw{flex:1;max-height:62px;border-top:1.5px solid var(--rule);font-size:19px}
+.trw:first-child{border-top:none}
+.trw.crit{background:#FDF3F2}
+.pri{display:flex;align-items:center;gap:10px;font-weight:700}
+.pri i{width:12px;height:12px;border-radius:50%}
+.cust{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag{font-size:13px;font-weight:700;letter-spacing:1px;color:#fff;border-radius:6px;padding:4px 0;text-align:center}
+.opened{color:var(--ink2)}.opened b{color:var(--muted);font-weight:500;margin-left:8px}.opened b.old{color:var(--bad);font-weight:800}
+.stl{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.stl .s1{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stl .s2{font-size:15px;color:var(--muted)}
+.stl .s2.quiet{color:#B26A00;font-weight:600}
+.tid{text-align:right;color:var(--muted);font-size:16px}
+.tmore{flex:none;border-top:1.5px solid var(--rule);padding:10px 24px;font-size:16px;color:var(--muted)}
+.standing{flex:none;border-left:5px solid var(--bad);background:#FDF3F2;border-radius:0 10px 10px 0;padding:14px 22px;font-size:19px;color:var(--ink2)}
+.standing b{color:var(--ink);font-weight:700}
+.calm{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--good)}
+.calm b{font-size:34px}.calm span{font-size:19px;color:var(--muted)}
+.intro .trw{animation:rise .55s cubic-bezier(.2,.8,.2,1) both}
+</style></head>
+<body><div id="stage">
+<div class="band"><div class="brand"><img src="data:image/png;base64,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" alt="luvelo"><span class="divider"></span><span class="tagline">Empowering Excellence</span></div>
+  <div class="title">Critical tickets</div>
+  <div class="right"><div class="when" id="when">Loading…</div>
+    <div class="live sample" id="live"><span class="pulse"></span><span id="livetxt">LOADING</span></div></div></div>
+<div class="stale" id="stale">Data may be out of date: the last successful refresh was over 30 minutes ago.</div>
+<main id="main" class="intro">
+  <p class="eyebrow">Every open Critical and High ticket</p>
+  <div class="row r4" id="tiles"></div>
+  <div class="tbl">
+    <div class="thd"><span>PRIORITY</span><span>CUSTOMER</span><span>TYPE</span><span>OPENED</span><span>STATE · LAST UPDATE</span><span style="text-align:right">TICKET</span></div>
+    <div class="trows" id="rows"></div>
+    <div class="tmore" id="more" style="display:none"></div>
+  </div>
+  <div class="standing" id="standing"></div>
+</main>
+<footer>Live from Intercom · Critical first, then High, oldest first within each · Age turns red after 30 days · Last update turns amber after 7 days without activity · <span id="pagever"></span></footer>
+</div>
+<script>
+const REFRESH_MS = 5 * 60 * 1000;
+const STALE_MIN = 30;
+const MAX_ROWS = 11;               // rows that fit on a 1080p screen
+const PAGE_VERSION = "2026-11-19.c1";
+const PRI = {Critical: "#D03B3B", High: "#EC835A"};
+const TAGS = {"Product Bug": ["BUG", "#2a78d6"], "Feature Request": ["FEAT", "#eb6834"], "User Troubleshooting": ["HELP", "#1baf7a"],
+  "Configuration Assistance": ["CONF", "#eda100"], "Access Request": ["ACC", "#e87ba4"], "Data Management": ["DATA", "#008300"],
+  "Internal Conversations": ["INT", "#4a3aa7"], "Platform Incident": ["INC", "#e34948"]};
+const STATES = {submitted: "Submitted", in_progress: "In progress", waiting_on_customer: "Waiting on customer"};
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const prevNum = {};
+let lastEpoch = 0, isSample = false, firstRender = true;
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const int = (v) => Math.round(v).toLocaleString("en-GB");
+const days = (v) => `${Math.round(v)} day${Math.round(v) === 1 ? "" : "s"}`;
+const FMT = {int, days};
+function num(key, value, fmt = "int") {
+  if (value == null) return "n/a";
+  return `<span class="num" data-k="${key}" data-v="${value}" data-f="${fmt}">${FMT[fmt](prevNum[key] ?? 0)}</span>`;
+}
+const tile = (key, label, value, cap, alert, fmt = "int") =>
+  `<div class="tile${alert ? " alert" : ""}"><div class="lab">${label}</div><div class="val">${num(key, value, fmt)}</div><div class="cap">${cap}</div></div>`;
+const dateLabel = (e) => new Date(e * 1000).toLocaleDateString("en-GB", {day: "numeric", month: "short", timeZone: "Africa/Johannesburg"});
+function ago(e) {
+  const m = Math.max(0, Math.floor((Date.now() / 1000 - e) / 60));
+  if (m < 60) return `${m} min ago`;
+  const h = Math.floor(m / 60);
+  return h < 24 ? `${h} h ago` : `${Math.floor(h / 24)} d ago`;
+}
+
+function render(d) {
+  lastData = d;
+  if (firstRender) renderedHidden = isHidden();
+  const rank = {Critical: 0, High: 1};
+  const t = d.tickets.slice().sort((a, b) => rank[a.priority] - rank[b.priority] || a.created_epoch - b.created_epoch);
+  const crit = t.filter((x) => x.priority === "Critical"), high = t.filter((x) => x.priority === "High");
+  const over30 = t.filter((x) => x.age_days >= 30);
+  const oldest = t.slice().sort((a, b) => a.created_epoch - b.created_epoch)[0];
+  const weekAgo = Date.now() / 1000 - 7 * 86400;
+  const critNew = crit.filter((x) => x.created_epoch >= weekAgo).length;
+
+  $("tiles").innerHTML =
+    tile("crit", "Critical open", crit.length, crit.length ? (critNew === crit.length ? `${crit.length === 1 ? "Raised" : "All raised"} this week`
+      : critNew ? `${critNew} raised this week` : `Oldest open ${Math.max(...crit.map((x) => x.age_days))} days`) : "None open", crit.length > 0) +
+    tile("high", "High open", high.length, `${t.length} of ${int(d.open_total)} open tickets`) +
+    tile("old", "Open 30+ days", over30.length, `of the ${t.length} Critical or High`, over30.length > 0) +
+    tile("oldest", "Oldest", oldest ? oldest.age_days : null, oldest ? `${oldest.priority} · since ${dateLabel(oldest.created_epoch)}` : "Nothing open", false, "days");
+
+  if (!t.length) {
+    $("rows").innerHTML = `<div class="calm"><b>No open Critical or High tickets</b><span>Nothing urgent in the queue</span></div>`;
+  } else {
+    $("rows").innerHTML = t.slice(0, MAX_ROWS).map((x, i) => {
+      const [tag, col] = TAGS[x.type] || ["N/A", "#9AA4B2"];
+      const quiet = Date.now() / 1000 - x.last_update_epoch > 7 * 86400;
+      const state = STATES[x.state] || "Open";
+      return `<div class="trw${x.priority === "Critical" ? " crit" : ""}" style="animation-delay:${(0.45 + i * 0.05).toFixed(2)}s">` +
+        `<span class="pri"><i style="background:${PRI[x.priority]}"></i>${x.priority}</span>` +
+        `<span class="cust">${esc(x.customer)}</span>` +
+        `<span class="tag" style="background:${col}">${tag}</span>` +
+        `<span class="opened">${dateLabel(x.created_epoch)}<b class="${x.age_days >= 30 ? "old" : ""}">${x.age_days}d</b></span>` +
+        `<span class="stl"><span class="s1">${x.title ? esc(x.title) : state}</span>` +
+        `<span class="s2${quiet ? " quiet" : ""}">${x.title ? state + " · " : ""}updated ${ago(x.last_update_epoch)}</span></span>` +
+        `<span class="tid">#${esc(x.id)}</span></div>`;
+    }).join("");
+  }
+  const hidden = t.length - MAX_ROWS;
+  $("more").style.display = hidden > 0 ? "block" : "none";
+  if (hidden > 0) {
+    const hc = t.slice(MAX_ROWS).filter((x) => x.priority === "Critical").length;
+    $("more").textContent = `+ ${hidden} more ${hc ? "" : "High "}ticket${hidden === 1 ? "" : "s"}, oldest first`;
+  }
+
+  // Standing summary, written from the data so it stays accurate.
+  let txt;
+  if (!t.length) txt = `<b>Nothing urgent open.</b> No Critical or High tickets in the queue.`;
+  else {
+    txt = `<b>${crit.length} Critical and ${high.length} High. ${over30.length ? `${over30.length} ${over30.length === 1 ? "has" : "have"} been open 30 days or longer, the oldest for ${oldest.age_days} days.` : "None has been open 30 days or longer."}</b>`;
+    const quietN = t.filter((x) => Date.now() / 1000 - x.last_update_epoch > 7 * 86400).length;
+    if (crit.length && critNew === crit.length) txt += ` ${crit.length === 1 ? "The Critical was" : "Both Criticals were"} raised this week.`.replace("Both Criticals", crit.length === 2 ? "Both Criticals" : `All ${crit.length} Criticals`);
+    if (over30.length && over30.every((x) => x.priority === "High")) txt += " The long tail is all High.";
+    if (quietN) txt += ` ${quietN} ${quietN === 1 ? "has" : "have"} had no update for over a week.`;
+  }
+  $("standing").innerHTML = txt;
+
+  animate();
+  lastEpoch = d.snapshot_epoch;
+  isSample = !!d.sample;
+  updateClock();
+  if (!firstRender) { $("live").classList.remove("flash"); void $("live").offsetWidth; $("live").classList.add("flash"); }
+  if (firstRender) setTimeout(() => $("main").classList.remove("intro"), 2400);
+  firstRender = false;
+}
+
+function animate() {
+  document.querySelectorAll(".num").forEach((el) => {
+    const k = el.dataset.k, to = +el.dataset.v, fmt = FMT[el.dataset.f], from = prevNum[k] ?? 0;
+    prevNum[k] = to;
+    if (from !== to && !firstRender) el.closest(".val")?.classList.add("bump");
+    if (REDUCED || from === to) { el.textContent = fmt(to); return; }
+    const t0 = performance.now() + (firstRender ? 400 : 0), dur = 1100;
+    const step = (t) => {
+      const p = Math.min(1, Math.max(0, (t - t0) / dur)), e = 1 - Math.pow(1 - p, 3);
+      el.textContent = fmt(from + (to - from) * e);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+function updateClock() {
+  if (!lastEpoch) return;
+  const mins = Math.floor((Date.now() / 1000 - lastEpoch) / 60);
+  const when = new Date(lastEpoch * 1000).toLocaleTimeString("en-GB", {hour: "2-digit", minute: "2-digit", timeZone: "Africa/Johannesburg"});
+  const agoTxt = mins < 1 ? "just now" : mins === 1 ? "1 min ago" : mins < 120 ? `${mins} min ago` : `${Math.floor(mins / 60)} h ago`;
+  $("when").textContent = `Last updated ${when} SAST · ${agoTxt}`;
+  const stale = mins > STALE_MIN && !isSample, live = $("live");
+  live.classList.toggle("sample", isSample);
+  live.classList.toggle("delayed", stale);
+  $("livetxt").textContent = isSample ? "SAMPLE DATA" : stale ? "DELAYED" : "LIVE";
+  $("stale").style.display = stale ? "block" : "none";
+}
+
+// Replay the intro when the page actually comes into view (Yodeck preloads pages),
+// plus ?intro_delay=SECONDS to replay it a fixed time after loading.
+let lastData = null, renderedHidden = false;
+const INTRO_DELAY = Math.max(0, Number(new URLSearchParams(location.search).get("intro_delay")) || 0);
+const isHidden = () => document.hidden || innerWidth < 50 || innerHeight < 50;
+function replayIntro() {
+  if (!lastData) return;
+  firstRender = true;
+  for (const k in prevNum) delete prevNum[k];
+  $("main").classList.add("intro");
+  render(lastData);
+}
+function maybeReplay() { if (renderedHidden && !isHidden()) { renderedHidden = false; replayIntro(); } }
+setInterval(maybeReplay, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) replayIntro(); });
+
+let pageVersion = null;
+async function checkForNewVersion() {
+  try {
+    const res = await fetch(`critical.html?v=${Date.now()}`, {method: "HEAD", cache: "no-store"});
+    const v = res.headers.get("etag") || res.headers.get("last-modified");
+    if (!v) return;
+    if (pageVersion === null) pageVersion = v; else if (v !== pageVersion) location.reload();
+  } catch (e) {}
+}
+
+async function load() {
+  checkForNewVersion();
+  try {
+    const res = await fetch(`critical.json?t=${Date.now()}`, {cache: "no-store"});
+    if (!res.ok) throw new Error(res.status);
+    const d = await res.json();
+    if (d.snapshot_epoch !== lastEpoch) {
+      const first = lastEpoch === 0;
+      render(d);
+      if (first && INTRO_DELAY > 0) setTimeout(replayIntro, INTRO_DELAY * 1000);
+    } else updateClock();
+  } catch (e) {
+    console.error("critical.json load failed", e);
+    if (!lastEpoch) $("rows").innerHTML = `<div class="calm" style="color:var(--muted)"><b>Waiting for the first refresh</b><span>critical.json has not been published yet</span></div>`;
+    updateClock();
+  }
+}
+
+function fit() {
+  const s = Math.min(innerWidth / 1920, innerHeight / 1080), st = $("stage");
+  st.style.transform = `scale(${s})`;
+  st.style.left = (innerWidth - 1920 * s) / 2 + "px";
+  st.style.top = (innerHeight - 1080 * s) / 2 + "px";
+}
+$("pagever").textContent = `Page version ${PAGE_VERSION}`;
+addEventListener("resize", () => { fit(); maybeReplay(); });
+fit();
+load();
+setInterval(load, REFRESH_MS);
+setInterval(updateClock, 30 * 1000);
+</script>
+</body></html>
