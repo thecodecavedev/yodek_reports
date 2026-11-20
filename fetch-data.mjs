@@ -1,6 +1,7 @@
 // Pulls the support figures from Intercom and writes, next to this script:
 //   data.json          screen 1, the support summary   (index.html)
 //   satisfaction.json  screen 3, customer satisfaction (satisfaction.html)
+//   critical.json      critical tickets screen (critical.html)
 //   uptime.json        uptime screen (uptime.html), only when UPTIMEROBOT_API_KEY is set
 // Runs inside GitHub Actions (Node 20+, no dependencies). The token comes from
 // the INTERCOM_TOKEN repository secret and never reaches the published pages.
@@ -25,6 +26,7 @@ const HIDE_CUSTOMERS = process.env.HIDE_CUSTOMERS === "true";
 const OUT = new URL("./data.json", import.meta.url);
 const OUT_SAT = new URL("./satisfaction.json", import.meta.url);
 const OUT_UP = new URL("./uptime.json", import.meta.url);
+const OUT_CRIT = new URL("./critical.json", import.meta.url);
 const UR_KEY = process.env.UPTIMEROBOT_API_KEY;
 const UPTIME_TARGET = Number(process.env.UPTIME_TARGET) || 0.999;
 const SHOW_TITLES = process.env.SHOW_TITLES !== "false";
@@ -309,6 +311,34 @@ const data = await pull(keep);
 await writeFile(OUT, JSON.stringify(data, null, 2));
 console.log(`wrote data.json: ${data.open_total} open, ${data.new_today} new today`);
 
+// ------------------------------------------------------------- critical tickets
+// Every conversation that is open right now with a Priority Level of Critical or High.
+// Tickets already marked Resolved are left out even if a later reply reopened the
+// conversation; snoozed conversations are not in the open state, so they are left out too.
+function pullCritical(open) {
+  const nowSec = Math.floor(Date.now() / 1000);
+  const names = {};
+  const label = (c) => {
+    const n = customerName(c);
+    return HIDE_CUSTOMERS ? (names[n] ||= `Customer ${Object.keys(names).length + 1}`) : n;
+  };
+  const tickets = open
+    .filter((c) => ["Critical", "High"].includes(priorityOf(c)))
+    .filter((c) => (c.ticket?.state || "").toLowerCase() !== "resolved")
+    .map((c) => ({
+      id: String(c.id),
+      priority: priorityOf(c),
+      customer: label(c),
+      type: ticketType(c),
+      created_epoch: c.created_at,
+      age_days: Math.floor((nowSec - c.created_at) / 86400),
+      state: (c.ticket?.state || "").toLowerCase(),          // submitted | in_progress | waiting_on_customer
+      last_update_epoch: c.updated_at || c.created_at,
+      title: SHOW_TITLES ? ticketTitle(c) : "",
+    }));
+  return { snapshot_epoch: nowSec, open_total: open.length, tickets };
+}
+
 // ------------------------------------------------------------- uptime (UptimeRobot)
 // Uses the UptimeRobot v2 getMonitors endpoint: uptime ratios plus down/up logs.
 // Log types: 1 = down, 2 = up, 98 = started, 99 = paused. Durations are in seconds.
@@ -430,6 +460,16 @@ try {
   console.log(`wrote satisfaction.json: ${sat.week.ratings_left} ratings this week, ${sat.week.negative} negative`);
 } catch (e) {
   console.error("satisfaction pull failed (screen 1 still updated):", e.message);
+}
+
+// Critical tickets reuse the open conversations already fetched for screen 1: no extra API calls.
+try {
+  const crit = pullCritical(keep.open || []);
+  await writeFile(OUT_CRIT, JSON.stringify(crit, null, 2));
+  const n = (p) => crit.tickets.filter((t) => t.priority === p).length;
+  console.log(`wrote critical.json: ${n("Critical")} Critical, ${n("High")} High`);
+} catch (e) {
+  console.error("critical pull failed (other screens still updated):", e.message);
 }
 
 if (UR_KEY) {
