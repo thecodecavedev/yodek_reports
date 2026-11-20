@@ -152,6 +152,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 .stl{display:flex;flex-direction:column;line-height:1.25;min-width:0}
 .stl .s1{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stl .s2{font-size:15px;color:var(--muted)}
+.stl .s1.sum{font-weight:500;color:var(--ink)}
 .stl .s2.quiet{color:#B26A00;font-weight:600}
 .tid{text-align:right;color:var(--muted);font-size:16px}
 .tmore{flex:none;border-top:1.5px solid var(--rule);padding:10px 24px;font-size:16px;color:var(--muted)}
@@ -171,7 +172,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
   <p class="eyebrow">Every open Critical and High ticket</p>
   <div class="row r4" id="tiles"></div>
   <div class="tbl">
-    <div class="thd"><span>PRIORITY</span><span>CUSTOMER</span><span>TYPE</span><span>OPENED</span><span>STATE · LAST UPDATE</span><span style="text-align:right">TICKET</span></div>
+    <div class="thd"><span>PRIORITY</span><span>CUSTOMER</span><span>TYPE</span><span>OPENED</span><span id="col5">STATE · LAST UPDATE</span><span style="text-align:right">TICKET</span></div>
     <div class="trows" id="rows"></div>
     <div class="tmore" id="more" style="display:none"></div>
   </div>
@@ -183,7 +184,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
 const REFRESH_MS = 5 * 60 * 1000;
 const STALE_MIN = 30;
 const MAX_ROWS = 11;               // rows that fit on a 1080p screen
-const PAGE_VERSION = "2026-11-19.c1";
+const PAGE_VERSION = "2026-11-20.c2";
 const PRI = {Critical: "#D03B3B", High: "#EC835A"};
 const TAGS = {"Product Bug": ["BUG", "#2a78d6"], "Feature Request": ["FEAT", "#eb6834"], "User Troubleshooting": ["HELP", "#1baf7a"],
   "Configuration Assistance": ["CONF", "#eda100"], "Access Request": ["ACC", "#e87ba4"], "Data Management": ["DATA", "#008300"],
@@ -237,13 +238,15 @@ function render(d) {
       const [tag, col] = TAGS[x.type] || ["N/A", "#9AA4B2"];
       const quiet = Date.now() / 1000 - x.last_update_epoch > 7 * 86400;
       const state = STATES[x.state] || "Open";
+      // AI summary first, then the ticket title, then just the state.
+      const head = x.summary || x.title || "";
       return `<div class="trw${x.priority === "Critical" ? " crit" : ""}" style="animation-delay:${(0.45 + i * 0.05).toFixed(2)}s">` +
         `<span class="pri"><i style="background:${PRI[x.priority]}"></i>${x.priority}</span>` +
         `<span class="cust">${esc(x.customer)}</span>` +
         `<span class="tag" style="background:${col}">${tag}</span>` +
         `<span class="opened">${dateLabel(x.created_epoch)}<b class="${x.age_days >= 30 ? "old" : ""}">${x.age_days}d</b></span>` +
-        `<span class="stl"><span class="s1">${x.title ? esc(x.title) : state}</span>` +
-        `<span class="s2${quiet ? " quiet" : ""}">${x.title ? state + " · " : ""}updated ${ago(x.last_update_epoch)}</span></span>` +
+        `<span class="stl"><span class="s1${x.summary ? " sum" : ""}">${head ? esc(head) : state}</span>` +
+        `<span class="s2${quiet ? " quiet" : ""}">${head ? state + " · " : ""}updated ${ago(x.last_update_epoch)}</span></span>` +
         `<span class="tid">#${esc(x.id)}</span></div>`;
     }).join("");
   }
@@ -253,6 +256,8 @@ function render(d) {
     const hc = t.slice(MAX_ROWS).filter((x) => x.priority === "Critical").length;
     $("more").textContent = `+ ${hidden} more ${hc ? "" : "High "}ticket${hidden === 1 ? "" : "s"}, oldest first`;
   }
+
+  $("col5").textContent = d.summaries_shown ? "SUMMARY · STATE · LAST UPDATE" : "STATE · LAST UPDATE";
 
   // Standing summary, written from the data so it stays accurate.
   let txt;
