@@ -151,7 +151,7 @@ footer{flex:none;padding:0 48px 10px;color:var(--muted);font-size:13px}
       <div class="key"><span><i style="background:var(--new)"></i>New</span><span><b class="lk"></b>Resolved</span></div></div>
       <div class="chartbox" id="byday"></div></div>
     <div class="card"><h3>Open by priority</h3><div id="priority"></div><div class="note" id="prinote"></div></div>
-    <div class="card"><h3>Open by ticket type, past 7 days</h3><div class="donutwrap" id="types"></div></div>
+    <div class="card"><h3>Open by ticket type, opened past 7 days</h3><div class="donutwrap" id="types"></div></div>
     <div class="card"><h3>Open by customer</h3><div id="customers"></div></div>
   </div>
 </main>
@@ -167,7 +167,7 @@ const NEUTRAL = "#9AA4B2";
 const PRI = {Critical:"#D03B3B", High:"#EC835A", Medium:"#FAB219"};
 const REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
 // Bump this whenever the page changes, so you can see on the TV which version it is running.
-const PAGE_VERSION = "2026-11-13.10";
+const PAGE_VERSION = "2026-11-19.11";
 let lastPoll = 0;
 
 // Last values shown, so a refresh animates from the old figure to the new one
@@ -225,7 +225,7 @@ function render(d) {
   const ptop = Math.max(1, ...d.priority.map((r) => r.count));
   $("priority").innerHTML = d.priority.map((r) =>
     `<div class="prow"><span class="dot" style="background:${PRI[r.label]}"></span><span class="pl">${r.label}</span>` +
-    `<div class="track"><div class="fill" ${size("p" + r.label, Math.max(0.8, r.count / ptop * 100), "width")
+    `<div class="track"><div class="fill" ${size("p" + r.label, r.count ? Math.max(0.8, r.count / ptop * 100) : 0, "width")
       .replace('style="', `style="background:${PRI[r.label]};`)}></div></div>` +
     `<span class="pn">${num("p" + r.label, r.count)}</span></div>`).join("");
   const ch = d.priority.filter((r) => r.label !== "Medium").reduce((a, r) => a + r.count, 0);
@@ -255,7 +255,7 @@ function render(d) {
   const ctop = Math.max(1, ...rows.map((r) => r.count));
   $("customers").innerHTML = `<div class="crow head"><span></span><span></span><span>Open</span><span>Avg age</span></div>` +
     rows.map((r, i) => `<div class="crow"><span class="cn">${esc(r.customer)}</span><div class="ctrack"><div class="cfill" ` +
-      `${size("c" + i, Math.max(0.8, r.count / ctop * 100), "width")}></div></div><b>${num("c" + i, r.count)}</b>` +
+      `${size("c" + i, r.count ? Math.max(0.8, r.count / ctop * 100) : 0, "width")}></div></div><b>${num("c" + i, r.count)}</b>` +
       `<span class="ca">${Math.round(r.avg_days)}d</span></div>`).join("");
 
   animate();
